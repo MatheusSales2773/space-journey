@@ -8,7 +8,7 @@ import pygame
 
 pygame.init()
 
-# CONFIGURAÇÕES DA TELA DO JOGO
+# CONFIGURAÇÕES DA screen DO JOGO
 width, height = 1080, 768
 screen = pygame.display.set_mode((width, height))
 pygame.display.set_caption("UCB's Space Journey")
@@ -26,37 +26,73 @@ spaceShip_speed = 5
 # CONFIGURAÇÃO FPS
 clock = pygame.time.Clock()
 
+# COLORS
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+DARK_BLUE = (10, 10, 50)
+
+pygame.font.get_fonts()
+
+# FONTES
+titleFont = pygame.font.SysFont('C:\Windows\Fonts\Arial.ttf', 50)
+descriptionFont = pygame.font.SysFont('terminal', 30)
+
+# ESTADOS
+MENU = "menu"
+RUNNING = "running"
+
+gameState = MENU
+
+# FUNÇÕES DO JOGO
+def showMenu():
+    scaled_background = pygame.transform.scale(background, (width, height))
+    screen.blit(scaled_background, (0, 0))
+
+    title = titleFont.render("Space Journey", True, WHITE)
+    instruction = descriptionFont.render("Pressione ENTER para começar", True, WHITE)
+
+    screen.blit(title, (width // 2 - title.get_width() // 2, height // 2 - title.get_height() // 2))
+    screen.blit(instruction, (width // 2 - instruction.get_width() // 2, height // 2 + title.get_height()))
+
+def showGame():
+    scaled_background = pygame.transform.scale(background, (width, height))
+    screen.blit(scaled_background, (0, 0))
+
+    for planet in planets.values():
+        screen.blit(planet["image"], planet["position"])
+
+    screen.blit(spaceShip, (spaceShip_x, spaceShip_y))
+
 while True:
     for evento in pygame.event.get():
         if evento.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
 
-    # Movimento da nave
-    teclas = pygame.key.get_pressed()
-    if teclas[pygame.K_LEFT]:
-        spaceShip_x -= spaceShip_speed
-    if teclas[pygame.K_RIGHT]:
-        spaceShip_x += spaceShip_speed
-    if teclas[pygame.K_UP]:
-        spaceShip_y -= spaceShip_speed
-    if teclas[pygame.K_DOWN]:
-        spaceShip_y += spaceShip_speed
+        if gameState == MENU:
+            if evento.type == pygame.KEYDOWN:
+                if evento.key == pygame.K_RETURN:
+                    gameState = RUNNING  
 
-    # Atualiza tela
-    screen.blit(background, (0, 0))
+    # CONDICIONAL PARA O MENU E O JOGO
+    if gameState == MENU:
+        showMenu()
 
-    # Desenha planetas
-    for planet in planets.values():
-        screen.blit(planet["image"], planet["position"])
+    elif gameState == RUNNING:
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_LEFT]:
+            spaceShip_x -= spaceShip_speed
+        if keys[pygame.K_RIGHT]:
+            spaceShip_x += spaceShip_speed
+        if keys[pygame.K_UP]:
+            spaceShip_y -= spaceShip_speed
+        if keys[pygame.K_DOWN]:
+            spaceShip_y += spaceShip_speed
 
-    # Desenha nave
-    screen.blit(spaceShip, (spaceShip_x, spaceShip_y))
+        showGame()
 
-    # Atualiza janela
+    # ATUALIZAÇÃO DA TELA
     pygame.display.flip()
-
-    # Controla FPS
     clock.tick(60)
 
 
