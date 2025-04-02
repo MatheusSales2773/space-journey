@@ -17,8 +17,16 @@ pygame.display.set_caption("UCB's Space Journey")
 background = pygame.image.load("assets/background.png")
 spaceShip = pygame.image.load("assets/spaceship.png")
 planets = {
-    "Earth": {"image": pygame.image.load("assets/earth.png"), "position": (100, 100)},
+    "Sun": {"image": pygame.image.load("assets/sun.png"), "position": (-400, 50)},
+    "Mercury": {"image": pygame.image.load("assets/mercury.png"), "position": (500, 325)},
+    "Earth": {"image": pygame.image.load("assets/earth.png"), "position": (800, 300)},
 }
+
+# SOUNDTRACK
+pygame.mixer.init()
+pygame.mixer.music.load("assets/audio/soundtrack.mp3")
+pygame.mixer.music.set_volume(0.1)
+pygame.mixer.music.play(-1)  
 
 spaceShip_x, spaceShip_y = 50, 50
 spaceShip_speed = 5
@@ -34,12 +42,14 @@ DARK_BLUE = (10, 10, 50)
 pygame.font.get_fonts()
 
 # FONTES
-titleFont = pygame.font.Font("./assets/fonts/Silkscreen-Regular.ttf", 82)
-instructionFont = pygame.font.Font("./assets/fonts/Silkscreen-Bold.ttf", 30)
+titleFont = pygame.font.Font("assets/fonts/Silkscreen-Regular.ttf", 82)
+instructionFont = pygame.font.Font("assets/fonts/Silkscreen-Bold.ttf", 30)
 
 # ESTADOS
 MENU = "menu"
 RUNNING = "running"
+
+IS_MUSIC_PLAYING = True
 
 gameState = MENU
 
@@ -49,31 +59,38 @@ def showMenu():
     screen.blit(scaled_background, (0, 0))
 
     title = titleFont.render("Space Journey", True, WHITE)
-    instruction = instructionFont.render("Pressione ENTER para começar", True, WHITE)
+    instruction = instructionFont.render("Pressione ESPAÇO para começar", True, WHITE)
 
     screen.blit(title, (width // 2 - title.get_width() // 2, height // 4 - title.get_height() // 4))
     screen.blit(instruction, (width // 2 - instruction.get_width() // 2, height // 2 + title.get_height()))
 
 def showGame():
-    screen.fill(DARK_BLUE)
+    screen.fill(BLACK)
 
-    for planet in planets.values():
-        scaled_planet = pygame.transform.scale(planet["image"], (300, 300))
+    planet_sizes = {
+        "Sun": (800, 800),
+        "Mercury": (100, 100),
+        "Earth": (150, 150),
+    }
+
+    for planet_name, planet in planets.items():
+        size = planet_sizes.get(planet_name, (100, 100))  # Default size if not specified
+        scaled_planet = pygame.transform.scale(planet["image"], size)
         screen.blit(scaled_planet, planet["position"])
 
     scaled_ship = pygame.transform.scale(spaceShip, (100, 100))
     screen.blit(scaled_ship, (spaceShip_x, spaceShip_y))
 
 while True:
-    for evento in pygame.event.get():
-        if evento.type == pygame.QUIT:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
 
         if gameState == MENU:
-            if evento.type == pygame.KEYDOWN:
-                if evento.key == pygame.K_RETURN:
-                    gameState = RUNNING  
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    gameState = RUNNING 
 
     # CONDICIONAL PARA O MENU E O JOGO
     if gameState == MENU:
