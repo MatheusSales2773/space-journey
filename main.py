@@ -34,8 +34,8 @@ DARK_BLUE = (10, 10, 50)
 pygame.font.get_fonts()
 
 # FONTES
-titleFont = pygame.font.SysFont('C:\Windows\Fonts\Arial.ttf', 50)
-descriptionFont = pygame.font.SysFont('terminal', 30)
+titleFont = pygame.font.Font("./assets/fonts/Silkscreen-Regular.ttf", 82)
+instructionFont = pygame.font.Font("./assets/fonts/Silkscreen-Bold.ttf", 30)
 
 # ESTADOS
 MENU = "menu"
@@ -49,19 +49,20 @@ def showMenu():
     screen.blit(scaled_background, (0, 0))
 
     title = titleFont.render("Space Journey", True, WHITE)
-    instruction = descriptionFont.render("Pressione ENTER para começar", True, WHITE)
+    instruction = instructionFont.render("Pressione ENTER para começar", True, WHITE)
 
-    screen.blit(title, (width // 2 - title.get_width() // 2, height // 2 - title.get_height() // 2))
+    screen.blit(title, (width // 2 - title.get_width() // 2, height // 4 - title.get_height() // 4))
     screen.blit(instruction, (width // 2 - instruction.get_width() // 2, height // 2 + title.get_height()))
 
 def showGame():
-    scaled_background = pygame.transform.scale(background, (width, height))
-    screen.blit(scaled_background, (0, 0))
+    screen.fill(DARK_BLUE)
 
     for planet in planets.values():
-        screen.blit(planet["image"], planet["position"])
+        scaled_planet = pygame.transform.scale(planet["image"], (300, 300))
+        screen.blit(scaled_planet, planet["position"])
 
-    screen.blit(spaceShip, (spaceShip_x, spaceShip_y))
+    scaled_ship = pygame.transform.scale(spaceShip, (100, 100))
+    screen.blit(scaled_ship, (spaceShip_x, spaceShip_y))
 
 while True:
     for evento in pygame.event.get():
