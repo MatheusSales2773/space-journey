@@ -5,11 +5,11 @@ Assuma o controle de uma nave espacial, explore o sistema solar e aprenda curios
 
 ## ✨ Recursos
 
--   Nave controlável com movimentação fluida e sistema de disparos.
+-   Nave controlável com movimentação e sistema de disparos.
 -   Arquitetura modular com gerenciamento de estados (menu, gameplay, etc.).
--   Suporte a tela cheia para imersão total.
+-   Suporte a tela cheia.
 -   Estrutura pronta para expansão: adição de fases, planetas interativos e quizzes educativos.
--   Código limpo, organizado e preparado para futuras melhorias.
+-   Código preparado para futuras melhorias.
 
 ## 🛠️ Tecnologias utilizadas
 
@@ -18,31 +18,12 @@ Assuma o controle de uma nave espacial, explore o sistema solar e aprenda curios
 -   **Arquitetura baseada em State Pattern**
 -   **Organização por módulos (config, core, screens, entities)**
 
-## 📂 Estrutura do projeto
-
-/jornada_espacial
-├── main.py
-├── config/
-│ └── settings.py
-├── core/
-│ └── state_manager.py
-├── screens/
-│ ├── menu.py
-│ └── gameplay.py
-├── entities/
-│ ├── spaceship.py
-│ └── bullet.py
-├── assets/
-│ ├── images/
-│ ├── audio/
-│ └── fonts/
-
 ## 🎮 Como rodar o jogo
 
 1. Clone o repositório:
 
     ```bash
-    git clone https://github.com/seu-usuario/jornada-espacial.git
+    git clone https://github.com/pablodixs/jornada-espacial.git
     cd jornada-espacial
     ```
 
