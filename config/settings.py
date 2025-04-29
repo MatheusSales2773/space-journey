@@ -15,7 +15,7 @@ FPS = 60
 # Soundtrack
 SOUNDTRACK_URL = "assets/audio/soundtrack.mp3"
 
-MUSIC_VOLUME = 0.5
+MUSIC_VOLUME = 0.1
 
 # Tiros
 SHOOT_SOUND = "assets/audio/shoot_sound.mp3"

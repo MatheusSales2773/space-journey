@@ -1,14 +1,14 @@
 import pygame
 
 from config import settings
-
 from core.state_manager import State
-
 from entities.spaceship import Spaceship
+from screens.menu import MenuState
 
 class GameplayState(State):
-    def __init__(self):
+    def __init__(self, manager):
         super().__init__()
+        self.manager = manager
         self.font = pygame.font.SysFont(None, 48)
         self.spaceship_image = pygame.image.load("assets/images/spaceship.png").convert_alpha()
         self.bullet_image = pygame.image.load("assets/images/bullet.png").convert_alpha()
@@ -22,7 +22,7 @@ class GameplayState(State):
         for event in events:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    print("Voltando ao menu...")
+                    self.manager.set_state(MenuState(self.manager))
                 if event.key == pygame.K_SPACE:
                     self.spaceship.shoot(self.bullets, self.bullet_image)
 

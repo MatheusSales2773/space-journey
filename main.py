@@ -6,6 +6,7 @@ from core.state_manager import StateManager
 from core.sound_manager import SoundManager
 
 from screens.menu import MenuState
+from screens.gameplay import GameplayState
 
 def main():
     pygame.init()
