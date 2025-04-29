@@ -3,10 +3,19 @@ import pygame
 from config import settings
 
 from core.state_manager import StateManager
+from core.sound_manager import SoundManager
+
 from screens.menu import MenuState
 
 def main():
     pygame.init()
+    SoundManager.init()
+
+    SoundManager.play_soundtrack(
+        settings.SOUNDTRACK_URL,
+        loop= -1,
+        volume= settings.MUSIC_VOLUME,
+    )
     
     if settings.FULLSCREEN:
         screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)

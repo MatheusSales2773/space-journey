@@ -1,4 +1,7 @@
 import pygame
+
+from config import settings
+
 from core.state_manager import State
 
 from entities.spaceship import Spaceship
@@ -9,8 +12,10 @@ class GameplayState(State):
         self.font = pygame.font.SysFont(None, 48)
         self.spaceship_image = pygame.image.load("assets/images/spaceship.png").convert_alpha()
         self.bullet_image = pygame.image.load("assets/images/bullet.png").convert_alpha()
+        
+        shoot_sound = pygame.mixer.Sound(settings.SHOOT_SOUND)
 
-        self.spaceship = Spaceship(self.spaceship_image, (400, 500))
+        self.spaceship = Spaceship(self.spaceship_image, (400, 500), shoot_sound)
         self.bullets = pygame.sprite.Group()
 
     def handle_events(self, events):
