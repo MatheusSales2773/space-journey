@@ -1,6 +1,6 @@
 # 🚀 Jornada Espacial
 
-**Jornada Espacial** é um jogo educativo desenvolvido com **Python** e **Pygame**, projetado para ensinar e divertir visitantes de um planetário.  
+**Jornada Espacial** é um jogo educativo desenvolvido com **Python** e **Pygame**, projetado para ensinar e divertir visitantes do Planetário de Brasília Luiz Cruls.  
 Assuma o controle de uma nave espacial, explore o sistema solar e aprenda curiosidades sobre os planetas enquanto se aventura pelo espaço!
 
 ## ✨ Recursos
