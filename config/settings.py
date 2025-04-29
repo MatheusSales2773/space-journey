@@ -21,3 +21,8 @@ MUSIC_VOLUME = 0.1
 SHOOT_SOUND = "assets/audio/shoot_sound.mp3"
 
 SFX_VOLUME = 0.75
+
+# COnfiguração de fontes
+FONT_PATH       = "assets/fonts/Silkscreen-Regular.ttf"
+FONT_SIZE_MENU  = 64
+FONT_SIZE_GAME  = 32
