@@ -34,6 +34,6 @@ class Spaceship(pygame.sprite.Sprite):
         if now - self.time_from_last_shoot > self.shoot_gap:
             self.shoot_sound.play()
             
-            bullet = Bullet(bullet_image, self.rect.centerx, self.rect.top)
+            bullet = Bullet(bullet_image, self.rect.centerx, self.rect.top, 0.1)
             bullet_group.add(bullet)
             self.time_from_last_shoot = now
