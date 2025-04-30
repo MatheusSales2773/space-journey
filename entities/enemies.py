@@ -11,7 +11,8 @@ class Enemy(pygame.sprite.Sprite):
         self.reset_position()
     
     def reset_position(self):
-        self.rect.x = random.randint(0, self.largura - self.rect.width)
+        max_x = max(0, self.largura - self.rect.width)  # Garante que o valor não seja negativo
+        self.rect.x = random.randint(0, max_x)
         self.rect.y = random.randint(-600, -64)
 
     def update(self, speed):
