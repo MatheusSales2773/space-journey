@@ -42,7 +42,7 @@ class GameplayState(State):
 
         # ─── 3. Preparar e escalar imagens derivadas ────────────
         # hearts
-        heart_size = 64
+        heart_size = 96
         self.heart_image = pygame.transform.smoothscale(
             self.heart_image, (heart_size, heart_size)
         )
@@ -66,7 +66,6 @@ class GameplayState(State):
             self.spaceship_image,
             (settings.WINDOW_WIDTH // 2, settings.WINDOW_HEIGHT - 100),
             self.shoot_sound,
-            shoot_gap=250,
             scale=0.2
         )
 
@@ -200,11 +199,14 @@ class GameplayState(State):
             overlay.set_alpha(alpha)
             screen.blit(overlay, (0, 0))
 
-        padding = 10
+        padding = 2
         heart_w = self.heart_image.get_width()
-        y = 50
+        heart_h = self.heart_image.get_height()
+
+        y = height - heart_h - padding
+
         for i in range(self.lives):
-            x = 10 + i * (heart_w + padding)
+            x = padding + i * (heart_w + padding)
             screen.blit(self.heart_image, (x, y))
 
         score_hud = self.font.render(f"Pontuação: {self.score}", True, (0, 255, 0))
