@@ -1,5 +1,3 @@
-import pygame
-
 # Tela cheia
 FULLSCREEN = True
 
