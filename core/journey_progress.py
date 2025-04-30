@@ -50,16 +50,18 @@ class JourneyProgress:
                         (bar_x + trav_w, bar_y, bar_w - trav_w, bar_h))
         
         trav_w = int(bar_w * (self.percent / 100))
+
         arrow_w, arrow_h = self.arrow_img.get_size()
         ax = bar_x + trav_w - arrow_w / 2
         ay = bar_y + (bar_h - arrow_h) / 2
         surface.blit(self.arrow_img, (ax, ay))
 
         perc_surf = self.font.render(f"{self.percent:.0f}%", True, (255,255,255))
-        pr = perc_surf.get_rect(center=(bar_x + trav_w, bar_y + bar_h + perc_surf.get_height()/2))
+        offset = 10  
+        pr = perc_surf.get_rect(center=(bar_x + trav_w, bar_y + bar_h + offset + perc_surf.get_height()/2))
         surface.blit(perc_surf, pr)
 
         dist_surf = self.font.render(self.distance_label, True, (255,255,255))
-        dx = bar_x + int(bar_w * 0.75)
+        dx = bar_x + bar_w // 2  
         dr = dist_surf.get_rect(midbottom=(dx, bar_y - 5))
         surface.blit(dist_surf, dr)

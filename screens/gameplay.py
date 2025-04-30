@@ -18,6 +18,7 @@ class GameplayState(State):
 
         # ─── 1. Font e sons ─────────────────────────────────────
         self.font = pygame.font.Font(settings.FONT_PATH, settings.FONT_SIZE_GAME)
+        self.font_alt = pygame.font.Font(settings.FONT_ALT_PATH, settings.FONT_SIZE_SMALL)
         self.shoot_sound = pygame.mixer.Sound(settings.SHOOT_SOUND)
 
         # ─── 2. Carregamento de imagens ─────────────────────────
@@ -81,10 +82,10 @@ class GameplayState(State):
         
         self.progress = JourneyProgress(
             position=(0, 0),         
-            size=(800, 20),      
+            size=(800, 10),      
             start_icon=self.flag_icon,
             end_icon=self.planet_icon,
-            font=self.font
+            font=self.font_alt
         )
 
         # ─── 7. Estrelas ────────────────────────────
@@ -144,7 +145,7 @@ class GameplayState(State):
         percent = (1 - self.distance_remain / self.total_distance) * 100
 
         dist_km = self.distance_remain / 1_000
-        dist_str = f"{dist_km/1e6:.3f} M km"
+        dist_str = f"{dist_km/1e6:.3f} milhões de km"
         self.progress.set_progress(percent, dist_str)
         collisions = pygame.sprite.groupcollide(
             self.asteroids,    
@@ -168,7 +169,7 @@ class GameplayState(State):
         percent = (1 - self.distance_remain / self.total_distance) * 100
 
         dist_km = self.distance_remain / 1_000
-        dist_str = f"{dist_km/1e6:.3f} M km"
+        dist_str = f"{dist_km/1e6:.3f} milhões de km"
         self.progress.set_progress(percent, dist_str)
 
         width, height = pygame.display.get_surface().get_size()

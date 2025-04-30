@@ -22,8 +22,11 @@ SFX_VOLUME = 0.75
 
 # COnfiguração de fontes
 FONT_PATH       = "assets/fonts/Silkscreen-Regular.ttf"
+FONT_ALT_PATH   = "assets/fonts/DIN-Bold.otf"
+
 FONT_SIZE_MENU  = 64
 FONT_SIZE_GAME  = 32
+FONT_SIZE_SMALL = 22
 
 # Estrelas
 NUM_STARS = 100
