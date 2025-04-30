@@ -121,7 +121,8 @@ class GameplayState(State):
         for event in events:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    self.manager.set_state(MenuState(self.manager))
+                    from screens.pause import PauseState
+                    self.manager.set_state(PauseState(self.manager))
                 if event.key == pygame.K_SPACE:
                     self.spaceship.shoot(self.bullets, self.bullet_image)
 
