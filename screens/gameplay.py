@@ -17,15 +17,24 @@ class GameplayState(State):
         self.spaceship_image = pygame.image.load("assets/images/spaceship.png").convert_alpha()
         self.bullet_image = pygame.image.load("assets/images/bullet.png").convert_alpha()
         self.asteroid_image = pygame.image.load("assets/images/asteroid.png").convert_alpha()
+        self.heart_image = pygame.image.load("assets/images/heart.png").convert_alpha()
 
         self.bg_orig  = pygame.image.load("assets/images/in_game_background.png").convert()
 
         self.background = None
         
+        heart_size = 64
         shoot_sound = pygame.mixer.Sound(settings.SHOOT_SOUND)
 
         self.score = 0
+        self.lives = 3
+
         self.spaceship = Spaceship(self.spaceship_image, (400, 500), shoot_sound, 0.2)
+        self.heart_image = pygame.transform.smoothscale(
+            self.heart_image,
+            (heart_size, heart_size)
+        )
+        
         self.bullets = pygame.sprite.Group()
         self.asteroids = pygame.sprite.Group()
 
@@ -77,6 +86,16 @@ class GameplayState(State):
 
         self.explosions.update(dt)
 
+        spaceship_hits = pygame.sprite.spritecollide(self.spaceship, self.asteroids, True)
+        if spaceship_hits:
+            for _ in spaceship_hits:
+                self.lives -= 1
+                exp = Explosion(self.explosion_frames, self.spaceship.rect.center)
+                self.explosions.add(exp)
+
+        if self.lives <= 0:
+            self.manager.set_state(MenuState(self.manager))
+
 
     def draw(self, screen):
         width, height = screen.get_size()
@@ -92,6 +111,11 @@ class GameplayState(State):
 
         self.explosions.draw(screen)
 
+        score_hud = self.font.render("Pontuação: " + str(self.score), True, (0, 255, 0))
         
-        text = self.font.render("Pontuação: " + str(self.score), True, (0, 255, 0))
-        screen.blit(text, (100, 20))
+        padding = 10          # espaço entre corações
+        x = 10                # margem esquerda
+        y = 50                # margem topo
+        for i in range(self.lives):
+            screen.blit(self.heart_image, (x + i * (64 + padding), y))
+            screen.blit(score_hud, (100, 20))
