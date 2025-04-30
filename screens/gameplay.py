@@ -2,6 +2,7 @@ import pygame, os, random
 
 from config import settings
 from core.state_manager import State
+from core.journey_progress import JourneyProgress
 
 from screens.menu import MenuState
 from screens.gameover import GameOverState
@@ -39,6 +40,12 @@ class GameplayState(State):
         self.bg_orig = pygame.image.load(
             "assets/images/in_game_background.png"
         ).convert()
+        self.flag_icon = pygame.image.load(
+            "assets/images/start_flag.png"
+        ).convert_alpha()
+        self.planet_icon = pygame.image.load(
+            "assets/images/earth_small.png"
+        ).convert_alpha()
 
         # ─── 3. Preparar e escalar imagens derivadas ────────────
         # hearts
@@ -47,8 +54,11 @@ class GameplayState(State):
             self.heart_image, (heart_size, heart_size)
         )
 
-        self.background = None
         self.hit_effect = None
+        
+        self.total_distance   = 58_000_000_000   # em metros
+        self.distance_remain  = self.total_distance
+        self.ship_speed       = 500_000_000
 
         # ─── 4. Configuração de efeito de colisão ──────────────
         self.hit_duration = 200            # ms de fade-out
@@ -60,13 +70,21 @@ class GameplayState(State):
         self.score = 0
         self.lives = 3
 
-        # ─── 6. Instanciar a Spaceship ──────────────────────────
+        # ─── 6. Instancias ──────────────────────────
         # escala embutida de 0.2 dentro do Spaceship
         self.spaceship = Spaceship(
             self.spaceship_image,
             (settings.WINDOW_WIDTH // 2, settings.WINDOW_HEIGHT - 100),
             self.shoot_sound,
             scale=0.2
+        )
+        
+        self.progress = JourneyProgress(
+            position=(0, 0),         
+            size=(800, 20),      
+            start_icon=self.flag_icon,
+            end_icon=self.planet_icon,
+            font=self.font
         )
 
         # ─── 7. Estrelas ────────────────────────────
@@ -119,11 +137,15 @@ class GameplayState(State):
             self.asteroids.add(asteroid)
             self.time_since_last_asteroid -= self.asteroid_spawn_gap
         
-        if self.score < 1000:  # Limite máximo da barra
-            self.score += dt * 100  # Incrementa a distância com base no tempo
-            if self.score > 1000:
-                 self.score = 1000  # Garante que a distância não ultrapasse o limite
+        travelled = self.ship_speed * dt
+        self.distance_remain = max(0, self.distance_remain - travelled)
 
+
+        percent = (1 - self.distance_remain / self.total_distance) * 100
+
+        dist_km = self.distance_remain / 1_000
+        dist_str = f"{dist_km/1e6:.3f} M km"
+        self.progress.set_progress(percent, dist_str)
         collisions = pygame.sprite.groupcollide(
             self.asteroids,    
             self.bullets,     
@@ -138,6 +160,16 @@ class GameplayState(State):
                 self.score += 10
 
         self.explosions.update(dt)
+        
+        travelled = self.ship_speed * dt
+        self.distance_remain = max(0, self.distance_remain - travelled)
+
+
+        percent = (1 - self.distance_remain / self.total_distance) * 100
+
+        dist_km = self.distance_remain / 1_000
+        dist_str = f"{dist_km/1e6:.3f} M km"
+        self.progress.set_progress(percent, dist_str)
 
         width, height = pygame.display.get_surface().get_size()
         for star in self.stars:
@@ -165,14 +197,10 @@ class GameplayState(State):
     def draw(self, screen):
         width, height = screen.get_size()
 
-        # if self.background is None:
-        #     self.background = pygame.transform.scale(self.bg_orig, (width, height))
         if self.hit_effect is None:
             self.hit_effect = pygame.transform.smoothscale(
                 self.collision_overlay, (width, height)
             )
-
-        # screen.blit(self.background, (0, 0))
 
         screen.fill((0, 0, 0))
 
@@ -212,10 +240,9 @@ class GameplayState(State):
             x = padding + i * (heart_w + padding)
             screen.blit(self.heart_image, (x, y))
 
-        score_hud = self.font.render(f"Pontuação: {self.score}", True, (0, 255, 0))
-        screen.blit(score_hud, (100, 20))
-        progress_width = (self.score * (settings.WINDOW_WIDTH * 1.0)) / 1000  # Calcula a largura da barra com base no progresso
-        pygame.draw.rect(screen, (255, 255, 255), (settings.WINDOW_WIDTH * 1.2, 20, progress_width, 17)) # A barra de progresso
 
-        distance_text = self.font.render(f"Distância: {int(1000 - self.score)}", True, (255, 255, 255))
-        screen.blit(distance_text, (20, 10))  
+        bar_w, bar_h = self.progress.width, self.progress.height
+        self.progress.x = (width - bar_w) // 2
+        self.progress.y = 50
+        self.progress.draw(screen)
+
