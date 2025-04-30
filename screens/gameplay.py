@@ -19,6 +19,7 @@ class GameplayState(State):
         
         shoot_sound = pygame.mixer.Sound(settings.SHOOT_SOUND)
 
+        self.score = 0
         self.spaceship = Spaceship(self.spaceship_image, (400, 500), shoot_sound, 0.2)
         self.bullets = pygame.sprite.Group()
         self.asteroids = pygame.sprite.Group()
@@ -38,6 +39,7 @@ class GameplayState(State):
         pressed_keys = pygame.key.get_pressed()
         self.spaceship.update(pressed_keys)
         self.bullets.update()
+        self.asteroids.update(dt)
 
         self.time_since_last_asteroid += dt
         if self.time_since_last_asteroid >= self.asteroid_spawn_gap:
@@ -46,7 +48,16 @@ class GameplayState(State):
             self.asteroids.add(asteroid)
             self.time_since_last_asteroid -= self.asteroid_spawn_gap
 
-        self.asteroids.update(dt)
+        collisions = pygame.sprite.groupcollide(
+            self.asteroids,    # primeiro grupo
+            self.bullets,      # segundo grupo
+            True,              # mata o asteroide
+            True               # mata a bala
+        )
+
+        if collisions:
+            for asteroid in collisions:
+                self.score += 10
 
 
     def draw(self, screen):
@@ -54,5 +65,5 @@ class GameplayState(State):
         self.asteroids.draw(screen)
         self.bullets.draw(screen)
         screen.blit(self.spaceship.image, self.spaceship.rect)
-        text = self.font.render("VERSÃO BETA", True, (0, 255, 0))
+        text = self.font.render("Pontuação: " + str(self.score), True, (0, 255, 0))
         screen.blit(text, (100, 20))
