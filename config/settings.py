@@ -24,3 +24,12 @@ SFX_VOLUME = 0.75
 FONT_PATH       = "assets/fonts/Silkscreen-Regular.ttf"
 FONT_SIZE_MENU  = 64
 FONT_SIZE_GAME  = 32
+
+# Estrelas
+NUM_STARS = 100
+
+# speed em pixels por segundo (min, max)
+STAR_SPEED_RANGE = (50, 200)
+
+# radius em pixels (min, max)
+STAR_RADIUS_RANGE = (1, 3)

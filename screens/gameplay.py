@@ -1,4 +1,4 @@
-import pygame, os
+import pygame, os, random
 
 from config import settings
 from core.state_manager import State
@@ -44,13 +44,22 @@ class GameplayState(State):
             self.heart_image,
             (heart_size, heart_size)
         )
+
+        width, height = pygame.display.get_surface().get_size()
+        self.stars = []
+        for _ in range(settings.NUM_STARS):
+            x = random.uniform(0, width)
+            y = random.uniform(0, height)
+            speed = random.uniform(*settings.STAR_SPEED_RANGE)
+            radius = random.randint(*settings.STAR_RADIUS_RANGE)
+            self.stars.append({"x": x, "y": y, "speed": speed, "r": radius})
         
         self.bullets = pygame.sprite.Group()
         self.asteroids = pygame.sprite.Group()
-
+        
         self.time_since_last_asteroid = 0.0
         self.asteroid_spawn_gap = 1.0
-
+        
         folder = 'assets/images/explosion'
         self.explosion_frames = []
         for filename in sorted(os.listdir(folder)):
@@ -96,6 +105,13 @@ class GameplayState(State):
 
         self.explosions.update(dt)
 
+        width, height = pygame.display.get_surface().get_size()
+        for star in self.stars:
+            star["y"] += star["speed"] * dt
+            if star["y"] > height:
+                star["y"] = 0
+                star["x"] = random.uniform(0, width)
+
         spaceship_hits = pygame.sprite.spritecollide(self.spaceship, self.asteroids, True)
         if spaceship_hits:
             for _ in spaceship_hits:
@@ -116,34 +132,34 @@ class GameplayState(State):
 
     def draw(self, screen):
         width, height = screen.get_size()
-        
-        if self.background is None:
-            self.background = pygame.transform.scale(self.bg_orig, (width, height))
 
+        # if self.background is None:
+        #     self.background = pygame.transform.scale(self.bg_orig, (width, height))
         if self.hit_effect is None:
             self.hit_effect = pygame.transform.smoothscale(
                 self.collision_overlay, (width, height)
             )
 
-        screen.blit(self.background, (0, 0))
+        # screen.blit(self.background, (0, 0))
+
+        screen.fill((0, 0, 0))
+
+        for star in self.stars:
+            pos = (int(star["x"]), int(star["y"]))
+            pygame.draw.circle(screen, (255, 255, 255), pos, star["r"])
 
         self.asteroids.draw(screen)
         self.bullets.draw(screen)
         screen.blit(self.spaceship.image, self.spaceship.rect)
-
         self.explosions.draw(screen)
-
-        score_hud = self.font.render("Pontuação: " + str(self.score), True, (0, 255, 0))
 
         if self.lives == 1:
             t = pygame.time.get_ticks() % self.blink_period
             half = self.blink_period / 2
-
             if t <= half:
                 alpha = int((t / half) * self.blink_max_alpha)
             else:
                 alpha = int(((self.blink_period - t) / half) * self.blink_max_alpha)
-
             overlay = self.hit_effect.copy()
             overlay.set_alpha(alpha)
             screen.blit(overlay, (0, 0))
@@ -153,10 +169,13 @@ class GameplayState(State):
             overlay = self.hit_effect.copy()
             overlay.set_alpha(alpha)
             screen.blit(overlay, (0, 0))
-        
-        padding = 10          # espaço entre corações
-        x = 10                # margem esquerda
-        y = 50                # margem topo
+
+        padding = 10
+        heart_w = self.heart_image.get_width()
+        y = 50
         for i in range(self.lives):
-            screen.blit(self.heart_image, (x + i * (64 + padding), y))
-            screen.blit(score_hud, (100, 20))
+            x = 10 + i * (heart_w + padding)
+            screen.blit(self.heart_image, (x, y))
+
+        score_hud = self.font.render(f"Pontuação: {self.score}", True, (0, 255, 0))
+        screen.blit(score_hud, (100, 20))
