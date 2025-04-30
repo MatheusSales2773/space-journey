@@ -82,7 +82,7 @@ class GameplayState(State):
         
         self.progress = JourneyProgress(
             position=(0, 0),         
-            size=(800, 10),      
+            size=(800, 14),      
             start_icon=self.flag_icon,
             end_icon=self.planet_icon,
             font=self.font_alt
