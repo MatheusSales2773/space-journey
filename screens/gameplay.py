@@ -19,7 +19,7 @@ class GameplayState(State):
         
         shoot_sound = pygame.mixer.Sound(settings.SHOOT_SOUND)
 
-        self.spaceship = Spaceship(self.spaceship_image, (400, 500), shoot_sound)
+        self.spaceship = Spaceship(self.spaceship_image, (400, 500), shoot_sound, 0.2)
         self.bullets = pygame.sprite.Group()
         self.asteroids = pygame.sprite.Group()
 
@@ -53,5 +53,5 @@ class GameplayState(State):
         screen.fill((0, 0, 0))
         self.bullets.draw(screen)
         screen.blit(self.spaceship.image, self.spaceship.rect)
-        text = self.font.render("Gameplay em andamento!", True, (0, 255, 0))
+        text = self.font.render("VERSÃO BETA", True, (0, 255, 0))
         screen.blit(text, (100, 20))

@@ -2,8 +2,14 @@ import pygame
 from entities.bullet import Bullet
 
 class Spaceship(pygame.sprite.Sprite):
-    def __init__(self, image, initial_position, shoot_sound):
+    def __init__(self, image, initial_position, shoot_sound, scale = 1.0):
         super().__init__()
+        
+        if scale != 1.0:
+            w = int(image.get_width() * scale)
+            h = int(image.get_height() * scale)
+            image = pygame.transform.smoothscale(image, (w, h))
+        
         self.image = image
         self.rect = self.image.get_rect(center=initial_position)
         self.speed = 5
