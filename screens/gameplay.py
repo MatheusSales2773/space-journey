@@ -14,60 +14,90 @@ class GameplayState(State):
     def __init__(self, manager):
         super().__init__()
         self.manager = manager
+
+        # ─── 1. Font e sons ─────────────────────────────────────
         self.font = pygame.font.Font(settings.FONT_PATH, settings.FONT_SIZE_GAME)
+        self.shoot_sound = pygame.mixer.Sound(settings.SHOOT_SOUND)
 
-        self.spaceship_image = pygame.image.load("assets/images/spaceship.png").convert_alpha()
-        self.bullet_image = pygame.image.load("assets/images/bullet.png").convert_alpha()
-        self.asteroid_image = pygame.image.load("assets/images/asteroid.png").convert_alpha()
-        self.heart_image = pygame.image.load("assets/images/heart.png").convert_alpha()
-        self.collision_overlay = pygame.image.load("assets/images/collision_overlay.png").convert_alpha()
+        # ─── 2. Carregamento de imagens ─────────────────────────
+        # Sprite principal
+        self.spaceship_image = pygame.image.load(
+            "assets/images/spaceship.png"
+        ).convert_alpha()
+        self.bullet_image = pygame.image.load(
+            "assets/images/bullet.png"
+        ).convert_alpha()
+        self.asteroid_image = pygame.image.load(
+            "assets/images/asteroid.png"
+        ).convert_alpha()
+        self.heart_image = pygame.image.load(
+            "assets/images/heart.png"
+        ).convert_alpha()
+        self.collision_overlay = pygame.image.load(
+            "assets/images/collision_overlay.png"
+        ).convert_alpha()
+        self.bg_orig = pygame.image.load(
+            "assets/images/in_game_background.png"
+        ).convert()
 
-        self.bg_orig  = pygame.image.load("assets/images/in_game_background.png").convert()
+        # ─── 3. Preparar e escalar imagens derivadas ────────────
+        # hearts
+        heart_size = 64
+        self.heart_image = pygame.transform.smoothscale(
+            self.heart_image, (heart_size, heart_size)
+        )
 
         self.background = None
-        
-        heart_size = 64
-        shoot_sound = pygame.mixer.Sound(settings.SHOOT_SOUND)
+        self.hit_effect = None
 
-        self.hit_effect = None      
-        self.hit_duration = 200     
-        self.hit_timer    = 0
-        self.overlay_blink_interval = 500  
-        self.blink_period = 1000  
+        # ─── 4. Configuração de efeito de colisão ──────────────
+        self.hit_duration = 200            # ms de fade-out
+        self.hit_timer = 0
+        self.blink_period = 1000           # ms de ciclo na última vida
         self.blink_max_alpha = 200
 
+        # ─── 5. Estado do jogador ───────────────────────────────
         self.score = 0
         self.lives = 3
 
-        self.spaceship = Spaceship(self.spaceship_image, (400, 500), shoot_sound, 0.2)
-        self.heart_image = pygame.transform.smoothscale(
-            self.heart_image,
-            (heart_size, heart_size)
+        # ─── 6. Instanciar a Spaceship ──────────────────────────
+        # escala embutida de 0.2 dentro do Spaceship
+        self.spaceship = Spaceship(
+            self.spaceship_image,
+            (settings.WINDOW_WIDTH // 2, settings.WINDOW_HEIGHT - 100),
+            self.shoot_sound,
+            shoot_gap=250,
+            scale=0.2
         )
 
+        # ─── 7. Estrelas ────────────────────────────
         width, height = pygame.display.get_surface().get_size()
         self.stars = []
         for _ in range(settings.NUM_STARS):
-            x = random.uniform(0, width)
-            y = random.uniform(0, height)
-            speed = random.uniform(*settings.STAR_SPEED_RANGE)
-            radius = random.randint(*settings.STAR_RADIUS_RANGE)
-            self.stars.append({"x": x, "y": y, "speed": speed, "r": radius})
-        
+            self.stars.append({
+                "x": random.uniform(0, width),
+                "y": random.uniform(0, height),
+                "speed": random.uniform(*settings.STAR_SPEED_RANGE),
+                "r": random.randint(*settings.STAR_RADIUS_RANGE),
+            })
+
+        # ─── 8. Grupos de sprites e timers ──────────────────────
         self.bullets = pygame.sprite.Group()
         self.asteroids = pygame.sprite.Group()
-        
+        self.explosions = pygame.sprite.Group()
+
         self.time_since_last_asteroid = 0.0
-        self.asteroid_spawn_gap = 1.0
-        
-        folder = 'assets/images/explosion'
+        self.asteroid_spawn_gap = 1.0     # segundos entre spawns
+
+        # ─── 9. Frames de explosão ──────────────────────────────
+        folder = "assets/images/explosion"
         self.explosion_frames = []
         for filename in sorted(os.listdir(folder)):
-            if filename.endswith('.png'):
-                img = pygame.image.load(os.path.join(folder, filename)).convert_alpha()
+            if filename.endswith(".png"):
+                img = pygame.image.load(
+                    os.path.join(folder, filename)
+                ).convert_alpha()
                 self.explosion_frames.append(img)
-
-        self.explosions = pygame.sprite.Group()
 
     def handle_events(self, events):
         for event in events:
