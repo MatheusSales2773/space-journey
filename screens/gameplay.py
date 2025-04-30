@@ -2,7 +2,9 @@ import pygame, os
 
 from config import settings
 from core.state_manager import State
+
 from screens.menu import MenuState
+from screens.gameover import GameOverState
 
 from entities.spaceship import Spaceship
 from entities.asteroid import Asteroid
@@ -94,7 +96,7 @@ class GameplayState(State):
                 self.explosions.add(exp)
 
         if self.lives <= 0:
-            self.manager.set_state(MenuState(self.manager))
+            self.manager.set_state(GameOverState(self.manager))
 
 
     def draw(self, screen):
