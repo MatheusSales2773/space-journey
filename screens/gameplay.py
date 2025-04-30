@@ -118,6 +118,11 @@ class GameplayState(State):
             asteroid = Asteroid(self.asteroid_image, width)
             self.asteroids.add(asteroid)
             self.time_since_last_asteroid -= self.asteroid_spawn_gap
+        
+        if self.score < 1000:  # Limite máximo da barra
+            self.score += dt * 100  # Incrementa a distância com base no tempo
+            if self.score > 1000:
+                 self.score = 1000  # Garante que a distância não ultrapasse o limite
 
         collisions = pygame.sprite.groupcollide(
             self.asteroids,    
@@ -156,8 +161,6 @@ class GameplayState(State):
             self.hit_timer -= dt * 1000
             if self.hit_timer < 0:
                 self.hit_timer = 0
-
-
 
     def draw(self, screen):
         width, height = screen.get_size()
@@ -211,3 +214,8 @@ class GameplayState(State):
 
         score_hud = self.font.render(f"Pontuação: {self.score}", True, (0, 255, 0))
         screen.blit(score_hud, (100, 20))
+        progress_width = (self.score * (settings.WINDOW_WIDTH * 1.0)) / 1000  # Calcula a largura da barra com base no progresso
+        pygame.draw.rect(screen, (255, 255, 255), (settings.WINDOW_WIDTH * 1.2, 20, progress_width, 17)) # A barra de progresso
+
+        distance_text = self.font.render(f"Distância: {int(1000 - self.score)}", True, (255, 255, 255))
+        screen.blit(distance_text, (20, 10))  
