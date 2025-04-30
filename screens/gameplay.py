@@ -5,7 +5,7 @@ from core.state_manager import State
 from screens.menu import MenuState
 
 from entities.spaceship import Spaceship
-from entities.asteroids import Asteroid
+from entities.asteroid import Asteroid
 
 class GameplayState(State):
     def __init__(self, manager):
@@ -51,6 +51,7 @@ class GameplayState(State):
 
     def draw(self, screen):
         screen.fill((0, 0, 0))
+        self.asteroids.draw(screen)
         self.bullets.draw(screen)
         screen.blit(self.spaceship.image, self.spaceship.rect)
         text = self.font.render("VERSÃO BETA", True, (0, 255, 0))
