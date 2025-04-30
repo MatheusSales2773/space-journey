@@ -20,6 +20,7 @@ class GameplayState(State):
         self.bullet_image = pygame.image.load("assets/images/bullet.png").convert_alpha()
         self.asteroid_image = pygame.image.load("assets/images/asteroid.png").convert_alpha()
         self.heart_image = pygame.image.load("assets/images/heart.png").convert_alpha()
+        self.collision_overlay = pygame.image.load("assets/images/collision_overlay.png").convert_alpha()
 
         self.bg_orig  = pygame.image.load("assets/images/in_game_background.png").convert()
 
@@ -27,6 +28,13 @@ class GameplayState(State):
         
         heart_size = 64
         shoot_sound = pygame.mixer.Sound(settings.SHOOT_SOUND)
+
+        self.hit_effect = None      
+        self.hit_duration = 200     
+        self.hit_timer    = 0
+        self.overlay_blink_interval = 500  
+        self.blink_period = 1000  
+        self.blink_max_alpha = 200
 
         self.score = 0
         self.lives = 3
@@ -92,11 +100,18 @@ class GameplayState(State):
         if spaceship_hits:
             for _ in spaceship_hits:
                 self.lives -= 1
+                self.hit_timer = self.hit_duration
                 exp = Explosion(self.explosion_frames, self.spaceship.rect.center)
                 self.explosions.add(exp)
 
         if self.lives <= 0:
             self.manager.set_state(GameOverState(self.manager))
+
+        if self.hit_timer > 0:
+            self.hit_timer -= dt * 1000
+            if self.hit_timer < 0:
+                self.hit_timer = 0
+
 
 
     def draw(self, screen):
@@ -104,6 +119,11 @@ class GameplayState(State):
         
         if self.background is None:
             self.background = pygame.transform.scale(self.bg_orig, (width, height))
+
+        if self.hit_effect is None:
+            self.hit_effect = pygame.transform.smoothscale(
+                self.collision_overlay, (width, height)
+            )
 
         screen.blit(self.background, (0, 0))
 
@@ -114,6 +134,25 @@ class GameplayState(State):
         self.explosions.draw(screen)
 
         score_hud = self.font.render("Pontuação: " + str(self.score), True, (0, 255, 0))
+
+        if self.lives == 1:
+            t = pygame.time.get_ticks() % self.blink_period
+            half = self.blink_period / 2
+
+            if t <= half:
+                alpha = int((t / half) * self.blink_max_alpha)
+            else:
+                alpha = int(((self.blink_period - t) / half) * self.blink_max_alpha)
+
+            overlay = self.hit_effect.copy()
+            overlay.set_alpha(alpha)
+            screen.blit(overlay, (0, 0))
+
+        elif self.hit_timer > 0:
+            alpha = int(self.hit_timer / self.hit_duration * 255)
+            overlay = self.hit_effect.copy()
+            overlay.set_alpha(alpha)
+            screen.blit(overlay, (0, 0))
         
         padding = 10          # espaço entre corações
         x = 10                # margem esquerda
