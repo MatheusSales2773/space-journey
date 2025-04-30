@@ -1,4 +1,4 @@
-import pygame
+import pygame, os
 
 from config import settings
 from core.state_manager import State
@@ -6,6 +6,7 @@ from screens.menu import MenuState
 
 from entities.spaceship import Spaceship
 from entities.asteroid import Asteroid
+from entities.explosion import Explosion
 
 class GameplayState(State):
     def __init__(self, manager):
@@ -26,6 +27,15 @@ class GameplayState(State):
 
         self.time_since_last_asteroid = 0.0
         self.asteroid_spawn_gap = 1.0
+
+        folder = 'assets/images/explosion'
+        self.explosion_frames = []
+        for filename in sorted(os.listdir(folder)):
+            if filename.endswith('.png'):
+                img = pygame.image.load(os.path.join(folder, filename)).convert_alpha()
+                self.explosion_frames.append(img)
+
+        self.explosions = pygame.sprite.Group()
 
     def handle_events(self, events):
         for event in events:
@@ -49,15 +59,19 @@ class GameplayState(State):
             self.time_since_last_asteroid -= self.asteroid_spawn_gap
 
         collisions = pygame.sprite.groupcollide(
-            self.asteroids,    # primeiro grupo
-            self.bullets,      # segundo grupo
-            True,              # mata o asteroide
-            True               # mata a bala
+            self.asteroids,    
+            self.bullets,     
+            True,              
+            True               
         )
 
         if collisions:
-            for asteroid in collisions:
+            for asteroid_sprite in collisions.keys():
+                exp = Explosion(self.explosion_frames, asteroid_sprite.rect.center)
+                self.explosions.add(exp)
                 self.score += 10
+
+        self.explosions.update(dt)
 
 
     def draw(self, screen):
@@ -65,5 +79,8 @@ class GameplayState(State):
         self.asteroids.draw(screen)
         self.bullets.draw(screen)
         screen.blit(self.spaceship.image, self.spaceship.rect)
+
+        self.explosions.draw(screen)
+
         text = self.font.render("Pontuação: " + str(self.score), True, (0, 255, 0))
         screen.blit(text, (100, 20))
