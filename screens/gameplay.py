@@ -17,6 +17,10 @@ class GameplayState(State):
         self.spaceship_image = pygame.image.load("assets/images/spaceship.png").convert_alpha()
         self.bullet_image = pygame.image.load("assets/images/bullet.png").convert_alpha()
         self.asteroid_image = pygame.image.load("assets/images/asteroid.png").convert_alpha()
+
+        self.bg_orig  = pygame.image.load("assets/images/in_game_background.png").convert()
+
+        self.background = None
         
         shoot_sound = pygame.mixer.Sound(settings.SHOOT_SOUND)
 
@@ -75,12 +79,19 @@ class GameplayState(State):
 
 
     def draw(self, screen):
-        screen.fill((0, 0, 0))
+        width, height = screen.get_size()
+        
+        if self.background is None:
+            self.background = pygame.transform.scale(self.bg_orig, (width, height))
+
+        screen.blit(self.background, (0, 0))
+
         self.asteroids.draw(screen)
         self.bullets.draw(screen)
         screen.blit(self.spaceship.image, self.spaceship.rect)
 
         self.explosions.draw(screen)
 
+        
         text = self.font.render("Pontuação: " + str(self.score), True, (0, 255, 0))
         screen.blit(text, (100, 20))
