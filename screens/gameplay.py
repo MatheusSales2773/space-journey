@@ -121,13 +121,11 @@ class GameplayState(State):
     def handle_events(self, events):
         for event in events:
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:  # Voltar ao menu principal
-                    self.manager.set_state(MenuState(self.manager))
-                elif event.key == pygame.K_SPACE:  # Atirar
+                if event.key == pygame.K_ESCAPE:
+                    from screens.pause import PauseState
+                    self.manager.set_state(PauseState(self.manager))
+                if event.key == pygame.K_SPACE:
                     self.spaceship.shoot(self.bullets, self.bullet_image)
-                elif event.key == pygame.K_p:  # Pausar o jogo
-                    # Exemplo: Implementar uma lógica de pausa, se necessário
-                    print("Jogo pausado (implementar lógica de pausa)")
             elif event.type == pygame.KEYUP:
                 # Exemplo: Lógica para soltar teclas, se necessário
                 pass

@@ -12,7 +12,7 @@ class JourneyProgress:
         start_icon,     # Surface da bandeira
         end_icon,       # Surface do planeta
         font,           
-        traveled_color=(241,162,8),   
+        traveled_color=(19,124,255),   
         remaining_color=(26,26,26)    
     ):
         self.x, self.y            = position
