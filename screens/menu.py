@@ -25,10 +25,13 @@ class MenuState(State):
 
     def handle_events(self, events):
         for event in events:
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
-                print("Trocando para o Gameplay...")
-                from screens.gameplay import GameplayState
-                self.manager.set_state(GameplayState(self.manager))
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RETURN:  # Pressionar Enter para iniciar
+                    from screens.level_selection import LevelSelectionState
+                    self.manager.set_state(LevelSelectionState(self.manager))
+                elif event.key == pygame.K_ESCAPE:  # Pressionar Esc para sair
+                    pygame.quit()
+                    exit()
                 
 
     def update(self, dt):
