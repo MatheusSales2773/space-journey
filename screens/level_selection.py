@@ -11,13 +11,14 @@ class LevelSelectionState(State):
 
         # Configuração dos planetas
         self.planets = [
-            {"name": "Mercúrio", "image": "assets/images/mercury.png"},
-            {"name": "Vênus", "image": "assets/images/earth.png"}, # mudar imagem
+            {"name": "Mercúrio", "image": "assets/images/mercury.png", "distance": 77_000_000, "speed": 300_000},
+            {"name": "Vênus", "image": "assets/images/earth.png", "distance": 41_000_000, "speed": 250_000}, # mudar imagem
             {"name": "Terra", "image": "assets/images/earth.png"},
-            {"name": "Marte", "image": "assets/images/earth.png"}, # mudar imagem
-            {"name": "Júpiter", "image": "assets/images/earth.png"}, # mudar imagem
-            {"name": "Saturno", "image": "assets/images/earth.png"}, # mudar imagem
-            {"name": "Urano", "image": "assets/images/earth.png"}, # mudar imagem
+            {"name": "Marte", "image": "assets/images/earth.png", "distance": 78_000_000, "speed": 350_000}, # mudar imagem
+            {"name": "Júpiter", "image": "assets/images/earth.png", "distance": 628_000_000, "speed": 500_000}, # mudar imagem
+            {"name": "Saturno", "image": "assets/images/earth.png", "distance": 1_275_000_000, "speed": 600_000}, # mudar imagem
+            {"name": "Urano", "image": "assets/images/earth.png", "distance": 2_721_000_000, "speed": 700_000}, # mudar imagem
+            {"name": "Netuno", "image": "assets/images/earth.png", "distance": 4_351_000_000, "speed": 800_000}, # mudar imagem
         ]
         self.current_index = 0  # Índice do planeta selecionado
         self.font = pygame.font.Font("assets/fonts/PressStart2P-Regular.ttf", 50) 
@@ -69,8 +70,8 @@ class LevelSelectionState(State):
                     self.current_index = (self.current_index + 1) % len(self.planets)
                     self.right_arrow_active = True  # Ativar o estado do símbolo ">"
                 elif event.key == pygame.K_RETURN:  # Confirmar seleção
-                    selected_planet = self.planets[self.current_index]["name"]
-                    self.manager.set_state(GameplayState(self.manager, selected_planet))
+                    selected_planet = self.planets[self.current_index]
+                    self.manager.set_state(GameplayState(self.manager, selected_planet["name"], selected_planet["distance"], selected_planet["speed"]))
             elif event.type == pygame.KEYUP:
                 if event.key == pygame.K_LEFT:  # Soltar a tecla "<"
                     self.left_arrow_active = False

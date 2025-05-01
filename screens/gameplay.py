@@ -12,10 +12,16 @@ from entities.asteroid import Asteroid
 from entities.explosion import Explosion
 
 class GameplayState(State):
-    def __init__(self, manager, planet_name):
+    def __init__(self, manager, planet_name, distance, speed):
         super().__init__()
         self.manager = manager
         self.planet_name = planet_name
+        self.distance = distance
+        self.speed = speed
+        
+        # Multiplicador global para aumentar a velocidade das fases
+        global_speed_multiplier = 6500.0  # Aumente este valor para acelerar mais as fases, mudem aqui se necessário
+        self.speed = speed * global_speed_multiplier
 
         # ─── 1. Font e sons ─────────────────────────────────────
         self.font = pygame.font.Font(settings.FONT_PATH, settings.FONT_SIZE_GAME)
@@ -58,9 +64,9 @@ class GameplayState(State):
 
         self.hit_effect = None
         
-        self.total_distance   = 58_000_000_000   # em metros
-        self.distance_remain  = self.total_distance
-        self.ship_speed       = 500_000_000
+        self.total_distance = self.distance * 1_000  # Converter para metros
+        self.distance_remain = self.total_distance
+        self.ship_speed = 500_000_00
 
         # ─── 4. Configuração de efeito de colisão ──────────────
         self.hit_duration = 200            # ms de fade-out
@@ -147,7 +153,7 @@ class GameplayState(State):
             self.asteroids.add(asteroid)
             self.time_since_last_asteroid -= self.asteroid_spawn_gap
         
-        travelled = self.ship_speed * dt
+        travelled = self.speed * dt
         self.distance_remain = max(0, self.distance_remain - travelled)
 
 
@@ -173,7 +179,10 @@ class GameplayState(State):
         
         travelled = self.ship_speed * dt
         self.distance_remain = max(0, self.distance_remain - travelled)
-
+        
+        # Verificar se a jornada foi concluída
+        if self.distance_remain <= 0:
+            self.manager.set_state(MenuState(self.manager))  # Voltar ao menu ou próximo estado
 
         percent = (1 - self.distance_remain / self.total_distance) * 100
 
