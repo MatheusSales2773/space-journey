@@ -1,5 +1,6 @@
 import pygame
 import math
+import random
 from core.state_manager import State
 from screens.gameplay import GameplayState
 
@@ -10,7 +11,7 @@ class LevelSelectionState(State):
 
         # Configuração dos planetas
         self.planets = [
-            {"name": "Mercúrio", "image": "assets/images/earth.png"}, # mudar imagem
+            {"name": "Mercúrio", "image": "assets/images/mercury.png"}, # mudar imagem
             {"name": "Vênus", "image": "assets/images/earth.png"}, # mudar imagem
             {"name": "Terra", "image": "assets/images/earth.png"},
             {"name": "Marte", "image": "assets/images/earth.png"}, # mudar imagem
@@ -27,6 +28,21 @@ class LevelSelectionState(State):
                 pygame.image.load(planet["image"]).convert_alpha(), (500, 500)  
             )
             for planet in self.planets
+        ]
+        
+        # Obter o tamanho da tela para as estrelas
+        width, height = pygame.display.get_surface().get_size()
+        
+        # Criar estrelas no fundo
+        self.stars = [
+            {
+                "x": random.randint(0, width),  # Posição horizontal
+                "y": random.randint(0, height),  # Posição vertical
+                "radius": random.randint(1, 3),  # Tamanho da estrela
+                "brightness": random.randint(50, 255),  # Brilho inicial (50 a 255)
+                "blink_speed": random.uniform(0.5, 2.0),  # Velocidade de piscada (0.5 a 2 segundos)
+            }
+            for _ in range(114)  # Número de estrelas
         ]
         
         # Animação das letras e planetas
@@ -69,10 +85,20 @@ class LevelSelectionState(State):
         # Atualizar o brilho dos planetas com pulsação suave
         self.brightness_time += dt
         self.brightness_scale = 1.0 + 0.01 * math.sin(self.brightness_time * 1.5)  # Suavizado
+        
+        # Atualizar o brilho das estrelas
+        for star in self.stars:
+            star["brightness"] = 128 + 127 * math.sin(pygame.time.get_ticks() * 0.001 * star["blink_speed"])
 
     def draw(self, screen):
         screen.fill((0, 0, 0))  # Fundo preto
         width, height = screen.get_size()
+
+        # Desenhar estrelas de fundo
+        for star in self.stars:
+            brightness = max(0, min(255, int(star["brightness"])))  # Garantir que o brilho esteja entre 0 e 255
+            color = (brightness, brightness, brightness)  # Cor da estrela (escala de cinza)
+            pygame.draw.circle(screen, color, (star["x"], star["y"]), star["radius"])
 
         # Exibir o planeta selecionado
         planet_image = self.planet_images[self.current_index]
