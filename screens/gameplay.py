@@ -12,9 +12,10 @@ from entities.asteroid import Asteroid
 from entities.explosion import Explosion
 
 class GameplayState(State):
-    def __init__(self, manager):
+    def __init__(self, manager, planet_name):
         super().__init__()
         self.manager = manager
+        self.planet_name = planet_name
 
         # ─── 1. Font e sons ─────────────────────────────────────
         self.font = pygame.font.Font(settings.FONT_PATH, settings.FONT_SIZE_GAME)
@@ -120,16 +121,26 @@ class GameplayState(State):
     def handle_events(self, events):
         for event in events:
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
+                if event.key == pygame.K_ESCAPE:  # Voltar ao menu principal
                     self.manager.set_state(MenuState(self.manager))
-                if event.key == pygame.K_SPACE:
+                elif event.key == pygame.K_SPACE:  # Atirar
                     self.spaceship.shoot(self.bullets, self.bullet_image)
+                elif event.key == pygame.K_p:  # Pausar o jogo
+                    # Exemplo: Implementar uma lógica de pausa, se necessário
+                    print("Jogo pausado (implementar lógica de pausa)")
+            elif event.type == pygame.KEYUP:
+                # Exemplo: Lógica para soltar teclas, se necessário
+                pass
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:  # Clique esquerdo do mouse
+                    print("Clique detectado (implementar lógica, se necessário)")
 
     def update(self, dt):
         pressed_keys = pygame.key.get_pressed()
         self.spaceship.update(pressed_keys)
         self.bullets.update()
         self.asteroids.update(dt)
+        
 
         self.time_since_last_asteroid += dt
         if self.time_since_last_asteroid >= self.asteroid_spawn_gap:
