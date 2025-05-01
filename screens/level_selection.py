@@ -11,7 +11,7 @@ class LevelSelectionState(State):
 
         # Configuração dos planetas
         self.planets = [
-            {"name": "Mercúrio", "image": "assets/images/mercury.png"}, # mudar imagem
+            {"name": "Mercúrio", "image": "assets/images/mercury.png"},
             {"name": "Vênus", "image": "assets/images/earth.png"}, # mudar imagem
             {"name": "Terra", "image": "assets/images/earth.png"},
             {"name": "Marte", "image": "assets/images/earth.png"}, # mudar imagem
@@ -92,6 +92,7 @@ class LevelSelectionState(State):
 
     def draw(self, screen):
         screen.fill((0, 0, 0))  # Fundo preto
+        
         width, height = screen.get_size()
 
         # Desenhar estrelas de fundo
@@ -100,6 +101,32 @@ class LevelSelectionState(State):
             color = (brightness, brightness, brightness)  # Cor da estrela (escala de cinza)
             pygame.draw.circle(screen, color, (star["x"], star["y"]), star["radius"])
 
+        # Calcular os índices do planeta anterior e seguinte
+        previous_index = (self.current_index - 1) % len(self.planets)
+        next_index = (self.current_index + 1) % len(self.planets)
+
+         # Exibir o planeta anterior (miniatura)
+        previous_planet_image = self.planet_images[previous_index]
+        previous_planet_image = pygame.transform.smoothscale(previous_planet_image, (150, 150))  # Reduzir tamanho
+        previous_planet_rect = previous_planet_image.get_rect(center=(width // 2 - 550, height // 2 - 50))
+        screen.blit(previous_planet_image, previous_planet_rect)
+        
+        # Aplicar filtro escuro no planeta anterior
+        dark_filter = pygame.Surface((150, 150), pygame.SRCALPHA)  # Criar uma superfície transparente
+        dark_filter.fill((0, 0, 0, 100))  # Preencher com preto semitransparente (100 de opacidade)
+        screen.blit(dark_filter, previous_planet_rect)
+        
+        # Exibir o próximo planeta (miniatura)
+        next_planet_image = self.planet_images[next_index]
+        next_planet_image = pygame.transform.smoothscale(next_planet_image, (150, 150))  # Reduzir tamanho
+        next_planet_rect = next_planet_image.get_rect(center=(width // 2 + 550, height // 2 - 50))
+        screen.blit(next_planet_image, next_planet_rect)
+        
+        # Aplicar filtro escuro no próximo planeta
+        dark_filter = pygame.Surface((150, 150), pygame.SRCALPHA)  # Criar uma superfície transparente
+        dark_filter.fill((0, 0, 0, 100))  # Preencher com preto semitransparente (100 de opacidade)
+        screen.blit(dark_filter, next_planet_rect)
+        
         # Exibir o planeta selecionado
         planet_image = self.planet_images[self.current_index]
         scaled_width = int(planet_image.get_width() * self.brightness_scale)
@@ -132,8 +159,8 @@ class LevelSelectionState(State):
         right_arrow = nav_font.render(">", True, right_arrow_color)
 
         # Posicionar os símbolos nas laterais
-        left_arrow_rect = left_arrow.get_rect(center=(50, height // 2))
-        right_arrow_rect = right_arrow.get_rect(center=(width - 50, height // 2))
+        left_arrow_rect = left_arrow.get_rect(center=(50, height // 2 - 50))
+        right_arrow_rect = right_arrow.get_rect(center=(width - 50, height // 2 - 50))
 
         # Desenhar os símbolos na tela
         screen.blit(left_arrow, left_arrow_rect)
