@@ -22,8 +22,8 @@ SFX_VOLUME = 0.75
 
 # COnfiguração de fontes
 FONT_PATH       = "assets/fonts/Silkscreen-Regular.ttf"
-FONT_ALT_PATH   = "assets/fonts/DIN-Bold.otf"
-FONT_ALT_EXPANDED_PATH   = "assets/fonts/Barlow-ExtraBoldItalic.ttf"
+FONT_ALT_PATH   = "assets/fonts/Rajdhani-Bold.ttf"
+FONT_ALT_EXPANDED_PATH   = "assets/fonts/Rajdhani-Bold.ttf"
 
 FONT_SIZE_MENU  = 64
 FONT_SIZE_GAME  = 32
