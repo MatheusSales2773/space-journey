@@ -6,7 +6,7 @@ class JourneyProgress:
         self,
         start_icon,
         end_icon,
-        traveled_color=(247, 167, 10),
+        traveled_color=(26, 163, 249),
         remaining_color=(26,26,26)
     ):
         self.x = 0
@@ -47,7 +47,7 @@ class JourneyProgress:
 
         # Alturas de texto e barra
         text_above = self.alt_font.get_height()
-        bar_h = 12
+        bar_h = 10
         text_below = self.font.get_height()
 
         # Cálculo de altura total (fundo)

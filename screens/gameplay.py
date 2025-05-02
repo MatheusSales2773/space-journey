@@ -181,7 +181,7 @@ class GameplayState(State):
     def draw(self, screen):
         width, height = screen.get_size()
 
-        screen.fill((0, 0, 0))
+        screen.fill((10, 10, 10))
         
         for star in self.stars:
             pos = (int(star["x"]), int(star["y"]))
