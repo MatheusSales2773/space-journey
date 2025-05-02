@@ -11,14 +11,37 @@ class LevelSelectionState(State):
 
         # Configuração dos planetas
         self.planets = [
-            {"name": "Mercúrio", "image": "assets/images/mercury.png", "distance": 77_000_000, "speed": 300_000},
-            {"name": "Vênus", "image": "assets/images/earth.png", "distance": 41_000_000, "speed": 250_000}, # mudar imagem
-            {"name": "Terra", "image": "assets/images/earth.png"},
-            {"name": "Marte", "image": "assets/images/earth.png", "distance": 78_000_000, "speed": 350_000}, # mudar imagem
-            {"name": "Júpiter", "image": "assets/images/earth.png", "distance": 628_000_000, "speed": 500_000}, # mudar imagem
-            {"name": "Saturno", "image": "assets/images/earth.png", "distance": 1_275_000_000, "speed": 600_000}, # mudar imagem
-            {"name": "Urano", "image": "assets/images/earth.png", "distance": 2_721_000_000, "speed": 700_000}, # mudar imagem
-            {"name": "Netuno", "image": "assets/images/earth.png", "distance": 4_351_000_000, "speed": 800_000}, # mudar imagem
+            {"name": "Mercúrio", "image": "assets/images/mercury.png", "distance": 77_000_000, "speed": 300_000,
+             "curiosity": "Mercúrio é o menor planeta do sistema solar e o mais próximo do Sol.",
+             "surface_image": "assets/images/surfaces/mercury_surface.png"},
+            # Vênus
+            {"name": "Vênus", "image": "assets/images/earth.png", "distance": 41_000_000, "speed": 250_000,
+             "curiosity": "Mercúrio é o menor planeta do sistema solar e o mais próximo do Sol.",
+             "surface_image": "assets/images/surfaces/mercury_surface.png"}, # mudar imagem
+            # Terra
+            {"name": "Terra", "image": "assets/images/earth.png",
+             "curiosity": "Mercúrio é o menor planeta do sistema solar e o mais próximo do Sol.",
+             "surface_image": "assets/images/surfaces/mercury_surface.png"},
+            # Marte
+            {"name": "Marte", "image": "assets/images/earth.png", "distance": 78_000_000, "speed": 350_000,
+             "curiosity": "O planeta vermelho é conhecido por suas tempestades de poeira.",
+             "surface_image": "assets/images/surfaces/mercury_surface.png"}, # mudar imagem
+            # Júpiter
+            {"name": "Júpiter", "image": "assets/images/earth.png", "distance": 628_000_000, "speed": 500_000,
+             "curiosity": "Mercúrio é o menor planeta do sistema solar e o mais próximo do Sol.",
+             "surface_image": "assets/images/surfaces/mercury_surface.png"}, # mudar imagem
+            # Saturno
+            {"name": "Saturno", "image": "assets/images/earth.png", "distance": 1_275_000_000, "speed": 600_000,
+             "curiosity": "Mercúrio é o menor planeta do sistema solar e o mais próximo do Sol.",
+             "surface_image": "assets/images/surfaces/mercury_surface.png"}, # mudar imagem
+            # Urano
+            {"name": "Urano", "image": "assets/images/earth.png", "distance": 2_721_000_000, "speed": 700_000,
+             "curiosity": "Mercúrio é o menor planeta do sistema solar e o mais próximo do Sol.",
+             "surface_image": "assets/images/surfaces/mercury_surface.png"}, # mudar imagem
+            # Netuno
+            {"name": "Netuno", "image": "assets/images/earth.png", "distance": 4_351_000_000, "speed": 800_000,
+             "curiosity": "Mercúrio é o menor planeta do sistema solar e o mais próximo do Sol.",
+             "surface_image": "assets/images/surfaces/mercury_surface.png"}, # mudar imagem
         ]
         self.current_index = 0  # Índice do planeta selecionado
         self.font = pygame.font.Font("assets/fonts/PressStart2P-Regular.ttf", 50) 
@@ -71,7 +94,14 @@ class LevelSelectionState(State):
                     self.right_arrow_active = True  # Ativar o estado do símbolo ">"
                 elif event.key == pygame.K_RETURN:  # Confirmar seleção
                     selected_planet = self.planets[self.current_index]
-                    self.manager.set_state(GameplayState(self.manager, selected_planet["name"], selected_planet["distance"], selected_planet["speed"]))
+                    self.manager.set_state(GameplayState(
+                        self.manager,
+                        selected_planet["name"],
+                        selected_planet["distance"],
+                        selected_planet["speed"],
+                        selected_planet["curiosity"],
+                        selected_planet["surface_image"]
+                    ))
             elif event.type == pygame.KEYUP:
                 if event.key == pygame.K_LEFT:  # Soltar a tecla "<"
                     self.left_arrow_active = False

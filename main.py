@@ -1,7 +1,5 @@
 import pygame
-
 from config import settings
-
 from core.state_manager import StateManager
 from core.sound_manager import SoundManager
 
@@ -26,7 +24,8 @@ def main():
     clock = pygame.time.Clock()
     running = True
 
-    state_manager = StateManager()
+    state_manager = StateManager(MenuState(None))
+    state_manager.current_state.manager = state_manager
     state_manager.set_state(MenuState(state_manager))
 
     while running:
