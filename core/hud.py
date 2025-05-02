@@ -63,7 +63,7 @@ class HUD:
 
         # Barra de progresso
         self.progress.x = (width - self.progress.width) // 2
-        self.progress.y = 50
+        self.progress.y = 0
         self.progress.draw(screen)
 
     def start_hit(self):
