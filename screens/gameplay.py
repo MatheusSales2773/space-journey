@@ -3,6 +3,7 @@ import pygame, os, random
 from config import settings
 from core.state_manager import State
 from core.journey_progress import JourneyProgress
+from core.hud import HUD
 
 from screens.menu import MenuState
 from screens.gameover import GameOverState
@@ -21,6 +22,7 @@ class GameplayState(State):
         self.font = pygame.font.Font(settings.FONT_PATH, settings.FONT_SIZE_GAME)
         self.font_alt = pygame.font.Font(settings.FONT_ALT_PATH, settings.FONT_SIZE_SMALL)
         self.shoot_sound = pygame.mixer.Sound(settings.SHOOT_SOUND)
+        screen_size = pygame.display.get_surface().get_size()
 
         # ─── 2. Carregamento de imagens ─────────────────────────
         # Sprite principal
@@ -35,9 +37,6 @@ class GameplayState(State):
         ).convert_alpha()
         self.heart_image = pygame.image.load(
             "assets/images/heart.png"
-        ).convert_alpha()
-        self.collision_overlay = pygame.image.load(
-            "assets/images/collision_overlay.png"
         ).convert_alpha()
         self.bg_orig = pygame.image.load(
             "assets/images/in_game_background.png"
@@ -62,12 +61,6 @@ class GameplayState(State):
         self.distance_remain  = self.total_distance
         self.ship_speed       = 500_000_000
 
-        # ─── 4. Configuração de efeito de colisão ──────────────
-        self.hit_duration = 200            # ms de fade-out
-        self.hit_timer = 0
-        self.blink_period = 1000           # ms de ciclo na última vida
-        self.blink_max_alpha = 200
-
         # ─── 5. Estado do jogador ───────────────────────────────
         self.score = 0
         self.lives = 3
@@ -88,6 +81,8 @@ class GameplayState(State):
             end_icon=self.planet_icon,
             font=self.font_alt
         )
+
+        self.hud = HUD(self.heart_image, self.progress, self.font, screen_size)
 
         # ─── 7. Estrelas ────────────────────────────
         width, height = pygame.display.get_surface().get_size()
@@ -138,7 +133,7 @@ class GameplayState(State):
         self.spaceship.update(pressed_keys)
         self.bullets.update()
         self.asteroids.update(dt)
-        
+        self.hud.update_hit_effect(dt, self.lives)
 
         self.time_since_last_asteroid += dt
         if self.time_since_last_asteroid >= self.asteroid_spawn_gap:
@@ -149,7 +144,6 @@ class GameplayState(State):
         
         travelled = self.ship_speed * dt
         self.distance_remain = max(0, self.distance_remain - travelled)
-
 
         percent = (1 - self.distance_remain / self.total_distance) * 100
 
@@ -192,27 +186,19 @@ class GameplayState(State):
         if spaceship_hits:
             for _ in spaceship_hits:
                 self.lives -= 1
-                self.hit_timer = self.hit_duration
+                self.hud.start_hit()
                 exp = Explosion(self.explosion_frames, self.spaceship.rect.center)
                 self.explosions.add(exp)
 
-        if self.lives <= 0:
-            self.manager.set_state(GameOverState(self.manager))
-
-        if self.hit_timer > 0:
-            self.hit_timer -= dt * 1000
-            if self.hit_timer < 0:
-                self.hit_timer = 0
+            if self.lives <= 0:
+                self.manager.set_state(GameOverState(self.manager))
 
     def draw(self, screen):
         width, height = screen.get_size()
 
-        if self.hit_effect is None:
-            self.hit_effect = pygame.transform.smoothscale(
-                self.collision_overlay, (width, height)
-            )
-
         screen.fill((0, 0, 0))
+
+        self.hud.draw(screen, self.lives, width, height)
 
         for star in self.stars:
             pos = (int(star["x"]), int(star["y"]))
@@ -222,37 +208,4 @@ class GameplayState(State):
         self.bullets.draw(screen)
         screen.blit(self.spaceship.image, self.spaceship.rect)
         self.explosions.draw(screen)
-
-        if self.lives == 1:
-            t = pygame.time.get_ticks() % self.blink_period
-            half = self.blink_period / 2
-            if t <= half:
-                alpha = int((t / half) * self.blink_max_alpha)
-            else:
-                alpha = int(((self.blink_period - t) / half) * self.blink_max_alpha)
-            overlay = self.hit_effect.copy()
-            overlay.set_alpha(alpha)
-            screen.blit(overlay, (0, 0))
-
-        elif self.hit_timer > 0:
-            alpha = int(self.hit_timer / self.hit_duration * 255)
-            overlay = self.hit_effect.copy()
-            overlay.set_alpha(alpha)
-            screen.blit(overlay, (0, 0))
-
-        padding = 2
-        heart_w = self.heart_image.get_width()
-        heart_h = self.heart_image.get_height()
-
-        y = height - heart_h - padding
-
-        for i in range(self.lives):
-            x = padding + i * (heart_w + padding)
-            screen.blit(self.heart_image, (x, y))
-
-
-        bar_w, bar_h = self.progress.width, self.progress.height
-        self.progress.x = (width - bar_w) // 2
-        self.progress.y = 50
-        self.progress.draw(screen)
 
