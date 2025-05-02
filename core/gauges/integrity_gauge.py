@@ -8,7 +8,6 @@ class ShipIntegrityGauge:
         self.max_lives = max_lives
         self.lives = max_lives
 
-        # Posição da HUD (ajustável)
         self.x = 0
         self.y = 0
 

@@ -69,7 +69,7 @@ class GameplayState(State):
             end_icon=self.planet_icon,
         )
 
-        self.hud = HUD(self.progress, self.font, screen_size)
+        self.hud = HUD(self.progress, self.font, screen_size, planet_name)
 
         # ─── 7. Estrelas ─────────────────────────
         width, height = pygame.display.get_surface().get_size()
