@@ -24,7 +24,7 @@ class GameplayState(State):
         self.shoot_sound = pygame.mixer.Sound(settings.SHOOT_SOUND)
         screen_size = pygame.display.get_surface().get_size()
 
-        # ─── 2. Carregamento de imagens ─────────────────────────
+        # ─── 2. Carregamento de imagens ───────────────────────────────
         # Sprite principal
         self.spaceship_image = pygame.image.load(
             "assets/images/spaceship.png"
@@ -48,7 +48,7 @@ class GameplayState(State):
             "assets/images/earth_small.png"
         ).convert_alpha()
 
-        # ─── 3. Preparar e escalar imagens derivadas ────────────
+        # ─── 3. Preparar e escalar imagens derivadas ─────────────────────────
         # hearts
         heart_size = 96
         self.heart_image = pygame.transform.smoothscale(
@@ -61,12 +61,11 @@ class GameplayState(State):
         self.distance_remain  = self.total_distance
         self.ship_speed       = 500_000_000
 
-        # ─── 5. Estado do jogador ───────────────────────────────
+        # ─── 5. Estado do jogador ───────────────────────────────────
         self.score = 0
         self.lives = 3
 
         # ─── 6. Instancias ──────────────────────────
-        # escala embutida de 0.2 dentro do Spaceship
         self.spaceship = Spaceship(
             self.spaceship_image,
             (settings.WINDOW_WIDTH // 2, settings.WINDOW_HEIGHT - 100),
@@ -84,7 +83,7 @@ class GameplayState(State):
 
         self.hud = HUD(self.heart_image, self.progress, self.font, screen_size)
 
-        # ─── 7. Estrelas ────────────────────────────
+        # ─── 7. Estrelas ─────────────────────────
         width, height = pygame.display.get_surface().get_size()
         self.stars = []
         for _ in range(settings.NUM_STARS):
@@ -103,7 +102,7 @@ class GameplayState(State):
         self.time_since_last_asteroid = 0.0
         self.asteroid_spawn_gap = 1.0     # segundos entre spawns
 
-        # ─── 9. Frames de explosão ──────────────────────────────
+        # ─── 9. Frames de explosão ───────────────────────────
         folder = "assets/images/explosion"
         self.explosion_frames = []
         for filename in sorted(os.listdir(folder)):
@@ -122,10 +121,9 @@ class GameplayState(State):
                 if event.key == pygame.K_SPACE:
                     self.spaceship.shoot(self.bullets, self.bullet_image)
             elif event.type == pygame.KEYUP:
-                # Exemplo: Lógica para soltar teclas, se necessário
                 pass
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1:  # Clique esquerdo do mouse
+                if event.button == 1:
                     print("Clique detectado (implementar lógica, se necessário)")
 
     def update(self, dt):
@@ -164,10 +162,9 @@ class GameplayState(State):
                 self.score += 10
 
         self.explosions.update(dt)
-        
+
         travelled = self.ship_speed * dt
         self.distance_remain = max(0, self.distance_remain - travelled)
-
 
         percent = (1 - self.distance_remain / self.total_distance) * 100
 
@@ -208,4 +205,3 @@ class GameplayState(State):
         self.bullets.draw(screen)
         screen.blit(self.spaceship.image, self.spaceship.rect)
         self.explosions.draw(screen)
-
