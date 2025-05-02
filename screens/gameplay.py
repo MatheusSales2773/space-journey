@@ -194,9 +194,7 @@ class GameplayState(State):
         width, height = screen.get_size()
 
         screen.fill((0, 0, 0))
-
-        self.hud.draw(screen, self.lives, width, height)
-
+        
         for star in self.stars:
             pos = (int(star["x"]), int(star["y"]))
             pygame.draw.circle(screen, (255, 255, 255), pos, star["r"])
@@ -205,3 +203,5 @@ class GameplayState(State):
         self.bullets.draw(screen)
         screen.blit(self.spaceship.image, self.spaceship.rect)
         self.explosions.draw(screen)
+
+        self.hud.draw(screen, self.lives, width, height)
