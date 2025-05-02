@@ -1,5 +1,8 @@
 import pygame
 
+from config import settings
+from core.gauges.integrity_gauge import ShipIntegrityGauge
+
 class HUD:
     def __init__(self, progress_bar, font, screen_size):
         self.progress = progress_bar
@@ -13,11 +16,23 @@ class HUD:
         self.hit_overlay = pygame.transform.smoothscale(overlay_raw, screen_size)
 
         self.heart_image = pygame.image.load("assets/images/heart.png").convert_alpha()
+        self.traling_bg = pygame.image.load("assets/images/hud/hud_trailing_bg.png").convert_alpha()
 
         heart_size = 96
         self.heart_image = pygame.transform.smoothscale(
             self.heart_image, (heart_size, heart_size)
         )
+
+        self.integrity_gauge = ShipIntegrityGauge(
+            bg_image_path="assets/images/hud/hud_trailing_bg.png",
+            heart_image_path="assets/images/heart.png",
+            font_path=settings.FONT_ALT_PATH,
+            font_size=20,
+            max_lives=3
+        )
+
+        self.integrity_gauge.set_position(20, 20)
+
 
     def update_hit_effect(self, dt, lives):
         if lives <= 0:
@@ -43,13 +58,7 @@ class HUD:
                 overlay.set_alpha(alpha)
                 screen.blit(overlay, (0, 0))
 
-        # Corações
-        padding = 2
-        heart_w, heart_h = self.heart_image.get_size()
-        y = height - heart_h - padding
-        for i in range(lives):
-            x = padding + i * (heart_w + padding)
-            screen.blit(self.heart_image, (x, y))
+        self.integrity_gauge.draw(screen)
 
         # Barra de progresso
         self.progress.x = (width - self.progress.width) // 2
