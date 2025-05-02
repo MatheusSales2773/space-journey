@@ -1,8 +1,7 @@
 import pygame
 
 class HUD:
-    def __init__(self, heart_img, progress_bar, font, screen_size):
-        self.heart_image = heart_img
+    def __init__(self, progress_bar, font, screen_size):
         self.progress = progress_bar
         self.font = font
         self.hit_timer = 0
@@ -12,6 +11,13 @@ class HUD:
 
         overlay_raw = pygame.image.load("assets/images/collision_overlay.png").convert_alpha()
         self.hit_overlay = pygame.transform.smoothscale(overlay_raw, screen_size)
+
+        self.heart_image = pygame.image.load("assets/images/heart.png").convert_alpha()
+
+        heart_size = 96
+        self.heart_image = pygame.transform.smoothscale(
+            self.heart_image, (heart_size, heart_size)
+        )
 
     def update_hit_effect(self, dt, lives):
         if lives <= 0:

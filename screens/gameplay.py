@@ -35,9 +35,6 @@ class GameplayState(State):
         self.asteroid_image = pygame.image.load(
             "assets/images/asteroid.png"
         ).convert_alpha()
-        self.heart_image = pygame.image.load(
-            "assets/images/heart.png"
-        ).convert_alpha()
         self.bg_orig = pygame.image.load(
             "assets/images/in_game_background.png"
         ).convert()
@@ -49,12 +46,6 @@ class GameplayState(State):
         ).convert_alpha()
 
         # ─── 3. Preparar e escalar imagens derivadas ─────────────────────────
-        # hearts
-        heart_size = 96
-        self.heart_image = pygame.transform.smoothscale(
-            self.heart_image, (heart_size, heart_size)
-        )
-
         self.hit_effect = None
         
         self.total_distance   = 58_000_000_000   # em metros
@@ -74,14 +65,11 @@ class GameplayState(State):
         )
         
         self.progress = JourneyProgress(
-            position=(0, 0),         
-            size=(800, 14),      
             start_icon=self.flag_icon,
             end_icon=self.planet_icon,
-            font=self.font_alt
         )
 
-        self.hud = HUD(self.heart_image, self.progress, self.font, screen_size)
+        self.hud = HUD(self.progress, self.font, screen_size)
 
         # ─── 7. Estrelas ─────────────────────────
         width, height = pygame.display.get_surface().get_size()
