@@ -2,9 +2,11 @@ import pygame
 
 from config import settings
 from core.gauges.integrity_gauge import ShipIntegrityGauge
+from core.gauges.tagert_gauge import TargetGauge
 
 class HUD:
-    def __init__(self, progress_bar, font, screen_size):
+    def __init__(self, progress_bar, font, screen_size, planet_name):
+        self.planet_name = planet_name
         self.progress = progress_bar
         self.font = font
         self.hit_timer = 0
@@ -33,6 +35,15 @@ class HUD:
 
         self.integrity_gauge.set_position(20, 20)
 
+        self.target_gauge = TargetGauge(
+            bg_image_path="assets/images/hud/hud_gauge_leading.png",
+            font_path=settings.FONT_ALT_PATH,
+            font_size=20,
+            planet_name=self.planet_name
+        )
+
+        self.target_gauge.set_position(20, 0)
+
 
     def update_hit_effect(self, dt, lives):
         if lives <= 0:
@@ -60,6 +71,8 @@ class HUD:
 
         self.integrity_gauge.update_lives(lives)
         self.integrity_gauge.draw(screen)
+
+        self.target_gauge.draw(screen)
 
         # Barra de progresso
         self.progress.x = (width - self.progress.width) // 2
