@@ -58,6 +58,7 @@ class HUD:
                 overlay.set_alpha(alpha)
                 screen.blit(overlay, (0, 0))
 
+        self.integrity_gauge.update_lives(lives)
         self.integrity_gauge.draw(screen)
 
         # Barra de progresso
