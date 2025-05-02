@@ -17,8 +17,8 @@ class JourneyProgress:
     ):
         self.x, self.y            = position
         self.width, self.height   = size
-        self.start_icon           = start_icon
-        self.end_icon             = end_icon
+        self.start_icon           = end_icon          # Mudei de lado, faz mais sentido porque a distância é calculada da Terra até os Planetas
+        self.end_icon             = start_icon        # Mudei de lado, essa bandeira significa a conclusão de um percurso
         self.font                 = pygame.font.Font(
             settings.FONT_ALT_EXPANDED_PATH, settings.FONT_SIZE_SMALL
         )
@@ -39,12 +39,14 @@ class JourneyProgress:
     def draw(self, surface: pygame.Surface):
         leading_icon = self.start_icon
         trailing_icon = self.end_icon
-
+        
         y_offset = (self.height - leading_icon.get_height()) / 2
         surface.blit(leading_icon, (self.x, self.y + y_offset))
+        
         surface.blit(trailing_icon, (self.x + self.width - trailing_icon.get_width(),
                         self.y + (self.height - trailing_icon.get_height()) / 2))
 
+        # Configurar a barra de progresso
         bar_x = self.x + leading_icon.get_width() + 5
         bar_w = self.width - leading_icon.get_width() - trailing_icon.get_width() - 10
         bar_y = self.y
@@ -56,7 +58,7 @@ class JourneyProgress:
         # Desenha a parte restante
         pygame.draw.rect(surface, self.remaining_color, (bar_x + trav_w, bar_y, bar_w - trav_w, bar_h))
 
-# Cria uma surface temporária com alpha (transparência)
+        # Cria uma surface temporária com alpha (transparência)
         border_surface = pygame.Surface((bar_w, bar_h), pygame.SRCALPHA)
 
         semi_transparent_white = (255, 255, 255, 64)
