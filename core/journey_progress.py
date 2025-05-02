@@ -51,32 +51,50 @@ class JourneyProgress:
         bar_h = self.height
 
         trav_w = int(bar_w * (self.percent / 100.0))
-        pygame.draw.rect(surface, self.traveled_color, (bar_x, bar_y, trav_w, bar_h))
+        skew = 2
 
-        # Desenha a parte restante
-        pygame.draw.rect(surface, self.remaining_color, (bar_x + trav_w, bar_y, bar_w - trav_w, bar_h))
+        # Desenha a parte percorrida como polígono inclinado
+        traveled_points = [
+            (bar_x + skew, bar_y),
+            (bar_x + trav_w + skew, bar_y),
+            (bar_x + trav_w - skew, bar_y + bar_h),
+            (bar_x - skew, bar_y + bar_h)
+        ]
+        pygame.draw.polygon(surface, self.traveled_color, traveled_points)
 
-# Cria uma surface temporária com alpha (transparência)
+        # Desenha a parte restante como polígono inclinado
+        remaining_points = [
+            (bar_x + trav_w + skew, bar_y),
+            (bar_x + bar_w + skew, bar_y),
+            (bar_x + bar_w - skew, bar_y + bar_h),
+            (bar_x + trav_w - skew, bar_y + bar_h)
+        ]
+        pygame.draw.polygon(surface, self.remaining_color, remaining_points)
+
+        # Desenha a borda semi-transparente
         border_surface = pygame.Surface((bar_w, bar_h), pygame.SRCALPHA)
-
         semi_transparent_white = (255, 255, 255, 64)
+        border_points = [
+            (bar_x + skew, bar_y),
+            (bar_x + bar_w + skew, bar_y),
+            (bar_x + bar_w - skew, bar_y + bar_h),
+            (bar_x - skew, bar_y + bar_h)
+        ]
+        pygame.draw.polygon(surface, semi_transparent_white, border_points, width=2)
 
-        pygame.draw.rect(border_surface, semi_transparent_white, (0, 0, bar_w, bar_h), width=2)
-
-        surface.blit(border_surface, (bar_x, bar_y))
-        
-        trav_w = int(bar_w * (self.percent / 100))
-
+        # Flecha de progresso
         arrow_w, arrow_h = self.arrow_img.get_size()
         ax = bar_x + trav_w - arrow_w / 2
         ay = bar_y + (bar_h - arrow_h) / 2
         surface.blit(self.arrow_img, (ax, ay))
 
+        # Porcentagem
         perc_surf = self.font.render(f"{self.percent:.0f}%", True, (255,255,255))
         offset = 10  
         pr = perc_surf.get_rect(center=(bar_x + trav_w, bar_y + bar_h + offset + perc_surf.get_height()/2))
         surface.blit(perc_surf, pr)
 
+        # Distância restante
         dist_surf = self.alt_font.render(self.distance_label, True, (255,255,255))
         dx = bar_x + bar_w // 2  
         dr = dist_surf.get_rect(midbottom=(dx, bar_y - 5))
