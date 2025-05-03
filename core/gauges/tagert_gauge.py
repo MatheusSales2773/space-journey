@@ -26,9 +26,9 @@ class TargetGauge:
 
         # Texto
         label = self.font.render("MISSÃO", True, (201, 201, 201))
-        label_rect = label.get_rect(topleft=(self.x + 32, self.y + 10))
+        label_rect = label.get_rect(topleft=(self.x + 36, self.y + 30))
         surface.blit(label, label_rect)
 
         label = self.title_font.render("VIAGEM À " + self.planet_name.upper(), True, (255, 255, 255))
-        label_rect = label.get_rect(midleft=(self.x + 42, self.y + 65))
+        label_rect = label.get_rect(midleft=(self.x + 42, self.y + 75))
         surface.blit(label, label_rect)
