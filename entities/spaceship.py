@@ -28,6 +28,10 @@ class Spaceship(pygame.sprite.Sprite):
             self.rect.y -= self.speed
         if pressed_keys[pygame.K_DOWN]:
             self.rect.y += self.speed
+            
+        # Garantir que o foguete não ultrapasse os limites da tela
+        self.rect.x = max(0, min(self.rect.x, pygame.display.get_surface().get_width() - self.rect.width))
+        self.rect.y = max(0, min(self.rect.y, pygame.display.get_surface().get_height() - self.rect.height))
 
     def shoot(self, bullet_group, bullet_image):
         now = pygame.time.get_ticks()
