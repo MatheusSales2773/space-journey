@@ -3,6 +3,7 @@ import pygame, os, random, math
 from config import settings
 from core.state_manager import State
 from core.journey_progress import JourneyProgress
+from core.hud import HUD
 
 from screens.menu import MenuState
 from screens.gameover import GameOverState
@@ -41,8 +42,9 @@ class GameplayState(State):
         self.font = pygame.font.Font(settings.FONT_PATH, settings.FONT_SIZE_GAME)
         self.font_alt = pygame.font.Font(settings.FONT_ALT_PATH, settings.FONT_SIZE_SMALL)
         self.shoot_sound = pygame.mixer.Sound(settings.SHOOT_SOUND)
+        screen_size = pygame.display.get_surface().get_size()
 
-        # ─── 2. Carregamento de imagens ─────────────────────────
+        # ─── 2. Carregamento de imagens ───────────────────────────────
         # Sprite principal
         self.spaceship_image = pygame.image.load(
             "assets/images/spaceship.png"
@@ -52,12 +54,6 @@ class GameplayState(State):
         ).convert_alpha()
         self.asteroid_image = pygame.image.load(
             "assets/images/asteroid.png"
-        ).convert_alpha()
-        self.heart_image = pygame.image.load(
-            "assets/images/heart.png"
-        ).convert_alpha()
-        self.collision_overlay = pygame.image.load(
-            "assets/images/collision_overlay.png"
         ).convert_alpha()
         self.bg_orig = pygame.image.load(
             "assets/images/in_game_background.png"
@@ -69,31 +65,18 @@ class GameplayState(State):
             "assets/images/earth_small.png"
         ).convert_alpha()
 
-        # ─── 3. Preparar e escalar imagens derivadas ────────────
-        # hearts
-        heart_size = 96
-        self.heart_image = pygame.transform.smoothscale(
-            self.heart_image, (heart_size, heart_size)
-        )
-
+        # ─── 3. Preparar e escalar imagens derivadas ─────────────────────────
         self.hit_effect = None
         
         self.total_distance = self.distance * 1_000  # Converter para metros
         self.distance_remain = self.total_distance
         self.ship_speed = 500_000_00
 
-        # ─── 4. Configuração de efeito de colisão ──────────────
-        self.hit_duration = 200            # ms de fade-out
-        self.hit_timer = 0
-        self.blink_period = 1000           # ms de ciclo na última vida
-        self.blink_max_alpha = 200
-
-        # ─── 5. Estado do jogador ───────────────────────────────
+        # ─── 5. Estado do jogador ───────────────────────────────────
         self.score = 0
         self.lives = 3
 
         # ─── 6. Instancias ──────────────────────────
-        # escala embutida de 0.2 dentro do Spaceship
         self.spaceship = Spaceship(
             self.spaceship_image,
             (settings.WINDOW_WIDTH // 2, settings.WINDOW_HEIGHT - 100),
@@ -102,14 +85,13 @@ class GameplayState(State):
         )
         
         self.progress = JourneyProgress(
-            position=(0, 0),         
-            size=(800, 14),      
             start_icon=self.flag_icon,
             end_icon=self.planet_icon,
-            font=self.font_alt
         )
 
-        # ─── 7. Estrelas ────────────────────────────
+        self.hud = HUD(self.progress, self.font, screen_size, planet_name)
+
+        # ─── 7. Estrelas ─────────────────────────
         width, height = pygame.display.get_surface().get_size()
         self.stars = []
         for _ in range(settings.NUM_STARS):
@@ -128,7 +110,7 @@ class GameplayState(State):
         self.time_since_last_asteroid = 0.0
         self.asteroid_spawn_gap = 1.0     # segundos entre spawns
 
-        # ─── 9. Frames de explosão ──────────────────────────────
+        # ─── 9. Frames de explosão ───────────────────────────
         folder = "assets/images/explosion"
         self.explosion_frames = []
         for filename in sorted(os.listdir(folder)):
@@ -147,110 +129,51 @@ class GameplayState(State):
                 if event.key == pygame.K_SPACE:
                     self.spaceship.shoot(self.bullets, self.bullet_image)
             elif event.type == pygame.KEYUP:
-                # Exemplo: Lógica para soltar teclas, se necessário
                 pass
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1:  # Clique esquerdo do mouse
+                if event.button == 1:
                     print("Clique detectado (implementar lógica, se necessário)")
 
     def update(self, dt):
-        if self.transition_stage == 0:
-            pressed_keys = pygame.key.get_pressed()
-            self.spaceship.update(pressed_keys)
-            self.bullets.update()
-            self.asteroids.update(dt)
-            
+        pressed_keys = pygame.key.get_pressed()
+        self.spaceship.update(pressed_keys)
+        self.bullets.update()
+        self.asteroids.update(dt)
+        self.hud.update_hit_effect(dt, self.lives)
 
-            self.time_since_last_asteroid += dt
-            if self.time_since_last_asteroid >= self.asteroid_spawn_gap:
-                width, _ = pygame.display.get_surface().get_size()
-                asteroid = Asteroid(self.asteroid_image, width)
-                self.asteroids.add(asteroid)
-                self.time_since_last_asteroid -= self.asteroid_spawn_gap
-            
-            # Atualizar a distância percorrida
-            travelled = self.speed * dt
-            self.distance_remain = max(0, self.distance_remain - travelled)
-
-            percent = (1 - self.distance_remain / self.total_distance) * 100
-            dist_km = self.distance_remain / 1_000
-            dist_str = f"{dist_km/1e6:.3f} milhões de km"
-            self.progress.set_progress(percent, dist_str)
-            
-            # Verificar colisões entre asteroides e tiros
-            collisions = pygame.sprite.groupcollide(
-                self.asteroids,    
-                self.bullets,     
-                True,              
-                True               
-            )
-
-            if collisions:
-                for asteroid_sprite in collisions.keys():
-                    exp = Explosion(self.explosion_frames, asteroid_sprite.rect.center)
-                    self.explosions.add(exp)
-                    self.score += 10
-
-            self.explosions.update(dt)
-            
-            # Verificar se a jornada foi concluída
-            if self.distance_remain <= 0 and not self.rocket_animation_active:
-                self.rocket_animation_active = True
-                self.rocket_animation_timer = 0
-                self.transition_stage = 1  # Iniciar a animação do foguete
-            pass
+        self.time_since_last_asteroid += dt
+        if self.time_since_last_asteroid >= self.asteroid_spawn_gap:
+            width, _ = pygame.display.get_surface().get_size()
+            asteroid = Asteroid(self.asteroid_image, width)
+            self.asteroids.add(asteroid)
+            self.time_since_last_asteroid -= self.asteroid_spawn_gap
         
-        # Animação do foguete indo para o centro e saindo da tela
-        elif self.transition_stage == 1:  # Animação do foguete
-            if self.rocket_direction is None:
-                # Calcular direção para o centro da tela
-                dx = self.rocket_target[0] - self.spaceship.rect.centerx
-                dy = self.rocket_target[1] - self.spaceship.rect.centery
-                distance = math.sqrt(dx**2 + dy**2)
-                self.rocket_direction = (dx / distance, dy / distance)  # Vetor unitário
+        travelled = self.ship_speed * dt
+        self.distance_remain = max(0, self.distance_remain - travelled)
 
-            # Mover o foguete em direção ao centro
-            self.spaceship.rect.x += self.rocket_direction[0] * self.rocket_exit_speed * dt
-            self.spaceship.rect.y += self.rocket_direction[1] * self.rocket_exit_speed * dt
-            
-            # Garantir que o foguete permaneça dentro dos limites da tela
-            self.spaceship.rect.x = max(0, min(self.spaceship.rect.x, settings.WINDOW_WIDTH - self.spaceship.rect.width))
-            self.spaceship.rect.y = max(0, min(self.spaceship.rect.y, settings.WINDOW_HEIGHT - self.spaceship.rect.height))
+        percent = (1 - self.distance_remain / self.total_distance) * 100
 
-            # Verificar se o foguete chegou ao centro
-            if math.hypot(
-                self.spaceship.rect.centerx - self.rocket_target[0],
-                self.spaceship.rect.centery - self.rocket_target[1]
-            ) < 10:  # Tolerância de 10 pixels
-                # Calcular direção para fora da tela (diagonal nordeste)
-                self.rocket_direction = (0, -1)  # Vetor unitário para cima
-                self.transition_stage = 2  # Passar para a próxima etapa
-                
-            # Mover o foguete para cima após atingir o centro
-            self.spaceship.rect.x += self.rocket_direction[0] * self.rocket_exit_speed * dt
-            self.spaceship.rect.y += self.rocket_direction[1] * self.rocket_exit_speed * dt
-            
-            # Verificar se o foguete saiu completamente da tela
-            if self.spaceship.rect.bottom < 0:  # Saiu pela parte superior
-                self.transition_stage = 2  # Passar para a próxima etapa
-                
-        # Animação da vinheta fechando
-        elif self.transition_stage == 2:
-            self.vignette_radius -= 800 * dt  # Velocidade de fechamento
-            if self.vignette_radius <= 0:
-                # Redimensionar a imagem da superfície para o tamanho da tela
-                width, height = settings.WINDOW_WIDTH, settings.WINDOW_HEIGHT
-                scaled_surface = pygame.transform.scale(self.surface_image, (width, height))
+        dist_km = self.distance_remain / 1_000
+        dist_str = f"{dist_km/1e6:.3f} milhões de km"
+        self.progress.set_progress(percent, dist_str)
+        collisions = pygame.sprite.groupcollide(
+            self.asteroids,    
+            self.bullets,     
+            True,              
+            True               
+        )
 
-                # Transição para o próximo estado
-                self.manager.set_state(PlanetTransitionState(
-                    self.manager,
-                    self.planet_name,
-                    scaled_surface,  # Usar a imagem redimensionada
-                    self.curiosity
-        ))
+        if collisions:
+            for asteroid_sprite in collisions.keys():
+                exp = Explosion(self.explosion_frames, asteroid_sprite.rect.center)
+                self.explosions.add(exp)
+                self.score += 10
 
-        # Atualizar o progresso
+        self.explosions.update(dt)
+
+        travelled = self.ship_speed * dt
+        self.distance_remain = max(0, self.distance_remain - travelled)
+
         percent = (1 - self.distance_remain / self.total_distance) * 100
         dist_km = self.distance_remain / 1_000
         dist_str = f"{dist_km / 1e6:.3f} milhões de km"
@@ -268,96 +191,25 @@ class GameplayState(State):
         if spaceship_hits:
             for _ in spaceship_hits:
                 self.lives -= 1
-                self.hit_timer = self.hit_duration
+                self.hud.start_hit()
                 exp = Explosion(self.explosion_frames, self.spaceship.rect.center)
                 self.explosions.add(exp)
 
-        # Verificar se o player perdeu todas as vidas
-        if self.lives <= 0:
-            self.manager.set_state(GameOverState(self.manager))
-    
-        # Atualizar o temporizador de impacto
-        if self.hit_timer > 0:
-            self.hit_timer -= dt * 1000
-            if self.hit_timer < 0:
-                self.hit_timer = 0
+            if self.lives <= 0:
+                self.manager.set_state(GameOverState(self.manager))
 
     def draw(self, screen):
         width, height = screen.get_size()
-
-        # Inicializar o efeito de colisão, se necessário
-        if self.hit_effect is None:
-            self.hit_effect = pygame.transform.smoothscale(
-                self.collision_overlay, (width, height)
-            )
-
-        screen.fill((0, 0, 0))
         
+        screen.fill((10, 10, 10))
         
-        # Desenhar o foguete durante a animação
-        if self.transition_stage == 1:
-            screen.fill((0, 0, 0))  # Limpar a tela
-            screen.blit(self.spaceship.image, self.spaceship.rect)
-            return  # Não desenhar mais nada durante a animação do foguete
+        for star in self.stars:
+            pos = (int(star["x"]), int(star["y"]))
+            pygame.draw.circle(screen, (255, 255, 255), pos, star["r"])
 
-        # Desenhar elementos do jogo apenas se não estiver em transição
-        if self.transition_stage == 0:
-            # estrelas
-            for star in self.stars:
-                pos = (int(star["x"]), int(star["y"]))
-                pygame.draw.circle(screen, (255, 255, 255), pos, star["r"])
+        self.asteroids.draw(screen)
+        self.bullets.draw(screen)
+        screen.blit(self.spaceship.image, self.spaceship.rect)
+        self.explosions.draw(screen)
 
-            # elementos do jogo
-            self.asteroids.draw(screen)
-            self.bullets.draw(screen)
-            screen.blit(self.spaceship.image, self.spaceship.rect)
-            self.explosions.draw(screen)
-            
-            # Atualizar a posição do foguete com limites
-            self.spaceship.rect.x = max(0, min(self.spaceship.rect.x, settings.WINDOW_WIDTH - self.spaceship.rect.width))
-            self.spaceship.rect.y = max(0, min(self.spaceship.rect.y, settings.WINDOW_HEIGHT - self.spaceship.rect.height))
-
-            # Efeito de piscar a tela, quando possui uma vida
-            if self.lives == 1:
-                t = pygame.time.get_ticks() % self.blink_period
-                half = self.blink_period / 2
-                if t <= half:
-                    alpha = int((t / half) * self.blink_max_alpha)
-                else:
-                    alpha = int(((self.blink_period - t) / half) * self.blink_max_alpha)
-                overlay = self.hit_effect.copy()
-                overlay.set_alpha(alpha)
-                screen.blit(overlay, (0, 0))
-
-            elif self.hit_timer > 0:
-                alpha = int(self.hit_timer / self.hit_duration * 255)
-                overlay = self.hit_effect.copy()
-                overlay.set_alpha(alpha)
-                screen.blit(overlay, (0, 0))
-
-            # corações
-            padding = 2
-            heart_w = self.heart_image.get_width()
-            heart_h = self.heart_image.get_height()
-            y = height - heart_h - padding
-            for i in range(self.lives):
-                x = padding + i * (heart_w + padding)
-                screen.blit(self.heart_image, (x, y))
-
-            # barra de progresso
-            bar_w, bar_h = self.progress.width, self.progress.height
-            self.progress.x = (width - bar_w) // 2
-            self.progress.y = 50
-            self.progress.draw(screen)
-        
-        # Desenhar a vinheta durante a transição
-        if self.transition_stage == 2:
-            vignette_surface = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
-            pygame.draw.circle(
-                vignette_surface,
-                (0, 0, 0, 255),
-                (settings.WINDOW_WIDTH // 2, settings.WINDOW_HEIGHT // 2),
-                max(0, int(self.vignette_radius))
-            )
-            screen.blit(vignette_surface, (0, 0))
-
+        self.hud.draw(screen, self.lives, width, height)
