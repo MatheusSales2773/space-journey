@@ -16,7 +16,10 @@ def main():
     )
     
     if settings.FULLSCREEN:
-        screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+        display_info = pygame.display.Info()
+        settings.WINDOW_WIDTH = display_info.current_w
+        settings.WINDOW_HEIGHT = display_info.current_h
+        screen = pygame.display.set_mode((settings.WINDOW_WIDTH, settings.WINDOW_HEIGHT), pygame.FULLSCREEN)
     else:
         screen = pygame.display.set_mode((settings.WINDOW_WIDTH, settings.WINDOW_HEIGHT))
 

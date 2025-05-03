@@ -1,4 +1,4 @@
-import pygame, os, random
+import pygame, os, random, math
 
 from config import settings
 from core.state_manager import State
@@ -28,6 +28,10 @@ class GameplayState(State):
         
         self.rocket_animation_active = False  # Controla se a animação está ativa
         self.rocket_animation_timer = 0  # Temporizador para a animação
+        
+        self.rocket_target = (settings.WINDOW_WIDTH // 2, settings.WINDOW_HEIGHT // 2)  # Centro da tela
+        self.rocket_exit_speed = 500  # Velocidade de saída do foguete
+        self.rocket_direction = None  # Direção do movimento do foguete
         
         # Multiplicador global para aumentar a velocidade das fases
         global_speed_multiplier = 6500.0  # Aumente este valor para acelerar mais as fases, mudem aqui se necessário
@@ -194,20 +198,41 @@ class GameplayState(State):
                 self.rocket_animation_active = True
                 self.rocket_animation_timer = 0
                 self.transition_stage = 1  # Iniciar a animação do foguete
-            
+            pass
+        
         # Animação do foguete indo para o centro e saindo da tela
-        elif self.transition_stage == 1:
-            self.rocket_animation_timer += dt
-            if self.spaceship.rect.centerx < settings.WINDOW_WIDTH // 2:
-                self.spaceship.rect.x += 5  # Mover para o centro horizontalmente
-            elif self.spaceship.rect.centery > 0:
-                self.spaceship.rect.y -= 5  # Mover para cima
-            else:  # Quando estiver no centro (ou próximo), mover para a direita
-                self.spaceship.rect.x += 5  # Ajuste a velocidade conforme necessário
-                if self.spaceship.rect.left > settings.WINDOW_WIDTH: #Esquerda do rect saiu da tela
-                    self.transition_stage = 2
-        elif self.rocket_animation_timer > 3:  # Delay de 3 segundos antes da vinheta
-                self.transition_stage = 2  # Iniciar a vinheta fechando
+        elif self.transition_stage == 1:  # Animação do foguete
+            if self.rocket_direction is None:
+                # Calcular direção para o centro da tela
+                dx = self.rocket_target[0] - self.spaceship.rect.centerx
+                dy = self.rocket_target[1] - self.spaceship.rect.centery
+                distance = math.sqrt(dx**2 + dy**2)
+                self.rocket_direction = (dx / distance, dy / distance)  # Vetor unitário
+
+            # Mover o foguete em direção ao centro
+            self.spaceship.rect.x += self.rocket_direction[0] * self.rocket_exit_speed * dt
+            self.spaceship.rect.y += self.rocket_direction[1] * self.rocket_exit_speed * dt
+            
+            # Garantir que o foguete permaneça dentro dos limites da tela
+            self.spaceship.rect.x = max(0, min(self.spaceship.rect.x, settings.WINDOW_WIDTH - self.spaceship.rect.width))
+            self.spaceship.rect.y = max(0, min(self.spaceship.rect.y, settings.WINDOW_HEIGHT - self.spaceship.rect.height))
+
+            # Verificar se o foguete chegou ao centro
+            if math.hypot(
+                self.spaceship.rect.centerx - self.rocket_target[0],
+                self.spaceship.rect.centery - self.rocket_target[1]
+            ) < 10:  # Tolerância de 10 pixels
+                # Calcular direção para fora da tela (diagonal nordeste)
+                self.rocket_direction = (0, -1)  # Vetor unitário para cima
+                self.transition_stage = 2  # Passar para a próxima etapa
+                
+            # Mover o foguete para cima após atingir o centro
+            self.spaceship.rect.x += self.rocket_direction[0] * self.rocket_exit_speed * dt
+            self.spaceship.rect.y += self.rocket_direction[1] * self.rocket_exit_speed * dt
+            
+            # Verificar se o foguete saiu completamente da tela
+            if self.spaceship.rect.bottom < 0:  # Saiu pela parte superior
+                self.transition_stage = 2  # Passar para a próxima etapa
                 
         # Animação da vinheta fechando
         elif self.transition_stage == 2:
@@ -287,6 +312,10 @@ class GameplayState(State):
             self.bullets.draw(screen)
             screen.blit(self.spaceship.image, self.spaceship.rect)
             self.explosions.draw(screen)
+            
+            # Atualizar a posição do foguete com limites
+            self.spaceship.rect.x = max(0, min(self.spaceship.rect.x, settings.WINDOW_WIDTH - self.spaceship.rect.width))
+            self.spaceship.rect.y = max(0, min(self.spaceship.rect.y, settings.WINDOW_HEIGHT - self.spaceship.rect.height))
 
             # Efeito de piscar a tela, quando possui uma vida
             if self.lives == 1:
