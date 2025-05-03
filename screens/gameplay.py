@@ -142,8 +142,8 @@ class GameplayState(State):
         if self.distance_remain <= 0 and not self.rocket_animation_active:
             print("Jornada concluída! Iniciando animação do foguete.")  # Depuração
             self.rocket_animation_active = True
-            self.rocket_animation_timer = 0
             self.transition_stage = 1  # Iniciar a animação do foguete
+            self.rocket_direction = None  # Resetar a direção do foguete
             return  # Interromper outras atualizações
 
         # Priorizar a animação do foguete e a vinheta
@@ -153,18 +153,21 @@ class GameplayState(State):
                 dx = self.rocket_target[0] - self.spaceship.rect.centerx
                 dy = self.rocket_target[1] - self.spaceship.rect.centery
                 distance = math.sqrt(dx**2 + dy**2)
-                self.rocket_direction = (dx / distance, dy / distance)  # Vetor unitário
+                if distance > 0:
+                    self.rocket_direction = (dx / distance, dy / distance)  # Vetor unitário
+                else:
+                    self.rocket_direction = (0, 0)  # Já está no centro
 
             # Mover o foguete em direção ao centro
             self.spaceship.rect.x += self.rocket_direction[0] * self.rocket_exit_speed * dt
             self.spaceship.rect.y += self.rocket_direction[1] * self.rocket_exit_speed * dt
 
             # Verificar se o foguete chegou ao centro
-            if math.hypot(
-                self.spaceship.rect.centerx - self.rocket_target[0],
-                self.spaceship.rect.centery - self.rocket_target[1]
-            ) < 10:  # Tolerância de 10 pixels
-                print("Foguete chegou ao centro. Saindo da tela.")  # Depuração
+            if abs(self.spaceship.rect.centerx - self.rocket_target[0]) < 5 and \
+            abs(self.spaceship.rect.centery - self.rocket_target[1]) < 5:  # Tolerância de 5 pixels
+                print("Foguete chegou ao centro. Ajustando direção para cima.")  # Depuração
+                self.spaceship.rect.centerx = self.rocket_target[0]  # Forçar alinhamento horizontal
+                self.spaceship.rect.centery = self.rocket_target[1]  # Forçar alinhamento vertical
                 self.rocket_direction = (0, -1)  # Vetor unitário para cima
 
             # Mover o foguete para cima após atingir o centro
@@ -249,7 +252,6 @@ class GameplayState(State):
 
             if self.lives <= 0:
                 self.manager.set_state(GameOverState(self.manager))
-
 
     def draw(self, screen):
         width, height = screen.get_size()
