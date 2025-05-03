@@ -1,5 +1,7 @@
 import pygame
 from config import settings
+
+from core.huds.tutorial_hud import TutorialHUD
 from core.state_manager import State
 from screens.gameplay import GameplayState
 
@@ -21,6 +23,7 @@ class TutorialState(State):
         img = pygame.image.load(
             "assets/images/backgrounds/earth_lift_off_bg.png"
         ).convert()
+
         img_w, img_h = img.get_size()
         scale = screen_w / img_w
         self.tutorial_img = pygame.transform.smoothscale(
@@ -37,6 +40,12 @@ class TutorialState(State):
 
         self.msg = "Pressione ESPAÇO para iniciar o scroll"
         self.start_msg = "Pressione ENTER para começar"
+
+        self.hud = TutorialHUD(
+            speed=self.scroll_speed,
+            is_scrolling=self.is_scrolling,
+            altitude=0
+        )
 
 
     def handle_events(self, events):
@@ -65,3 +74,4 @@ class TutorialState(State):
             screen.blit(text_surf, text_rect)
 
         screen.blit(self.spaceship, self.rect)
+        self.hud.draw(screen)
