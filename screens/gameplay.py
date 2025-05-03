@@ -1,4 +1,4 @@
-import pygame, os, random
+import pygame, os, random, math
 
 from config import settings
 from core.state_manager import State
@@ -7,16 +7,36 @@ from core.hud import HUD
 
 from screens.menu import MenuState
 from screens.gameover import GameOverState
+from screens.planet_transition import PlanetTransitionState
 
 from entities.spaceship import Spaceship
 from entities.asteroid import Asteroid
 from entities.explosion import Explosion
 
 class GameplayState(State):
-    def __init__(self, manager, planet_name):
+    def __init__(self, manager, planet_name, distance, speed, curiosity, surface_image_path):
         super().__init__()
         self.manager = manager
         self.planet_name = planet_name
+        self.distance = distance
+        self.speed = speed
+        
+        self.transition_stage = 0  # 0: gameplay, 1: foguete animando, 2: vinheta fechando
+        self.transition_timer = 0  # Temporizador para controlar os delays
+        self.vignette_radius = max(settings.WINDOW_WIDTH, settings.WINDOW_HEIGHT)  # Para a vinheta
+        self.curiosity = curiosity
+        self.surface_image = pygame.image.load(surface_image_path).convert_alpha()
+        
+        self.rocket_animation_active = False  # Controla se a animação está ativa
+        self.rocket_animation_timer = 0  # Temporizador para a animação
+        
+        self.rocket_target = (settings.WINDOW_WIDTH // 2, settings.WINDOW_HEIGHT // 2)  # Centro da tela
+        self.rocket_exit_speed = 500  # Velocidade de saída do foguete
+        self.rocket_direction = None  # Direção do movimento do foguete
+        
+        # Multiplicador global para aumentar a velocidade das fases
+        global_speed_multiplier = 6500.0  # Aumente este valor para acelerar mais as fases, mudem aqui se necessário
+        self.speed = speed * global_speed_multiplier
 
         # ─── 1. Font e sons ─────────────────────────────────────
         self.font = pygame.font.Font(settings.FONT_PATH, settings.FONT_SIZE_GAME)
@@ -48,9 +68,9 @@ class GameplayState(State):
         # ─── 3. Preparar e escalar imagens derivadas ─────────────────────────
         self.hit_effect = None
         
-        self.total_distance   = 58_000_000_000   # em metros
-        self.distance_remain  = self.total_distance
-        self.ship_speed       = 500_000_000
+        self.total_distance = self.distance * 1_000  # Converter para metros
+        self.distance_remain = self.total_distance
+        self.ship_speed = 500_000_00
 
         # ─── 5. Estado do jogador ───────────────────────────────────
         self.score = 0
@@ -155,11 +175,11 @@ class GameplayState(State):
         self.distance_remain = max(0, self.distance_remain - travelled)
 
         percent = (1 - self.distance_remain / self.total_distance) * 100
-
         dist_km = self.distance_remain / 1_000
-        dist_str = f"{dist_km/1e6:.3f} milhões de km"
+        dist_str = f"{dist_km / 1e6:.3f} milhões de km"
         self.progress.set_progress(percent, dist_str)
 
+        # atualizar estelas
         width, height = pygame.display.get_surface().get_size()
         for star in self.stars:
             star["y"] += star["speed"] * dt
@@ -180,7 +200,7 @@ class GameplayState(State):
 
     def draw(self, screen):
         width, height = screen.get_size()
-
+        
         screen.fill((10, 10, 10))
         
         for star in self.stars:

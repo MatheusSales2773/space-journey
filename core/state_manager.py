@@ -11,10 +11,10 @@ class State:
     def draw(self, screen):
         pass
 
-
 class StateManager:
-    def __init__(self):
+    def __init__(self, initial_state):
         self.current_state = None
+        self.current_state = initial_state
 
     def set_state(self, state: State):
         self.current_state = state
