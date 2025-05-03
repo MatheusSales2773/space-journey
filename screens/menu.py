@@ -32,6 +32,9 @@ class MenuState(State):
                 elif event.key == pygame.K_ESCAPE:  # Pressionar Esc para sair
                     pygame.quit()
                     exit()
+                elif event.key == pygame.K_t:
+                    from screens.tutorial import TutorialState
+                    self.manager.set_state(TutorialState(self.manager))
                 
 
     def update(self, dt):
