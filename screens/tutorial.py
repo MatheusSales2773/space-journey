@@ -9,9 +9,6 @@ class TutorialState(State):
     def __init__(self, manager):
         super().__init__()
         self.manager      = manager
-        self.scroll_speed = 250
-        self.is_scrolling = False
-        self.altitude = 0
 
         screen_w, screen_h = pygame.display.get_surface().get_size()
 
@@ -37,15 +34,22 @@ class TutorialState(State):
 
         self.y_offset   = self.max_offset
 
+        self.is_scrolling = False
+        self.current_speed = 0.0
+        self.target_speed = self.max_offset / 20.0
+
+        accel_time = 10.0
+        self.acceleration = self.target_speed / accel_time
+
         self.font = pygame.font.Font(settings.FONT_PATH, settings.FONT_SIZE_GAME)
 
         self.msg = "Pressione ESPAÇO para iniciar o scroll"
         self.start_msg = "Pressione ENTER para começar"
 
         self.hud = TutorialHUD(
-            speed=self.scroll_speed,
-            altitude=self.altitude,
-            is_scrolling=self.is_scrolling
+            speed=0,
+            altitude=False,
+            is_scrolling=0
         )
 
     def handle_events(self, events):
@@ -59,20 +63,22 @@ class TutorialState(State):
 
     def update(self, dt):
         if self.is_scrolling and self.y_offset > 0:
-            self.y_offset -= self.scroll_speed * dt
+            if self.current_speed < self.target_speed:
+                self.current_speed = min(
+                    self.target_speed,
+                    self.current_speed + self.acceleration * dt
+                )
+            self.y_offset -= self.current_speed * dt
             if self.y_offset < 0:
                 self.y_offset = 0
 
-        if self.max_offset > 0:
-            progress = (self.max_offset - self.y_offset) / self.max_offset
-        else:
-            progress = 1.0
-        self.altitude = progress * 100.0
+        progresso = (self.max_offset - self.y_offset) / self.max_offset if self.max_offset else 1
+        altitude_km = progresso * 100.0
 
         self.hud.update(
-            self.scroll_speed,
-            self.altitude,
-            self.is_scrolling
+            speed=self.current_speed,
+            altitude=altitude_km,
+            is_scrolling=self.is_scrolling
         )
 
     def draw(self, screen):

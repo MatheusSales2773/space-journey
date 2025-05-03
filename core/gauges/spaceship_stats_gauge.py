@@ -49,7 +49,9 @@ class SpaceshipStatsGauge:
         speed_label_rect = speed_label.get_rect(midleft=(self.x - 30, self.y + 74))
         surface.blit(speed_label, speed_label_rect)
 
-        altitude_text = self.text.render(str(self.speed) + " KM/H", True, (255, 255, 255))
-        altitude_text_rect = altitude_text.get_rect(midleft=(self.x + 80, self.y + 74))
+        speed_int = int(self.speed)
+
+        altitude_text = self.text.render(str(speed_int) + " KM/H", True, (255, 255, 255))
+        altitude_text_rect = altitude_text.get_rect(midright=(self.x + 220, self.y + 74))
         surface.blit(altitude_text, altitude_text_rect)
 
