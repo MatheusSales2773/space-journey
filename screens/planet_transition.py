@@ -8,6 +8,7 @@ class PlanetTransitionState:
         self.manager = manager
         self.planet_name = planet_name
         self.planet_surface = planet_surface
+        print("Imagem da superfície recebida:", self.planet_surface)  # Depuração
         self.curiosity = curiosity
         self.alpha = 0
         self.fade_speed = 2
@@ -36,6 +37,9 @@ class PlanetTransitionState:
         else:
             # Após a vinheta fechar, iniciar o temporizador
             self.timer += dt
+            self.alpha += self.fade_speed
+            if self.alpha > 255:
+                self.alpha = 255
             if self.timer > 5:  # Após 5 segundos, abrir a vinheta
                 self.show_message_box = True
                 self.message_box_opacity += 200 * dt
@@ -46,9 +50,13 @@ class PlanetTransitionState:
         screen.fill((0, 0, 0))  # Preenche a tela com preto
 
         # Desenha a imagem do planeta com o efeito de fade-in
-        self.planet_surface.set_alpha(self.alpha)  # Aplica o alpha à superfície
-        planet_rect = self.planet_surface.get_rect(center=(settings.WINDOW_WIDTH // 2, settings.WINDOW_HEIGHT // 2))
-        screen.blit(self.planet_surface, planet_rect)
+        if self.planet_surface:
+            print("Desenhando imagem da superfície...")  # Depuração
+            print("Alpha atual:", self.alpha)
+            self.planet_surface.set_alpha(self.alpha)  # Aplica o alpha à superfície
+            screen.blit(self.planet_surface, (0, 0))  # Desenha a imagem
+        else:
+            print("Erro: Imagem da superfície não está definida.")
 
         # Desenhar a vinheta
         vignette_surface = pygame.Surface(screen.get_size(), pygame.SRCALPHA)

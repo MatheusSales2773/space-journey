@@ -214,7 +214,7 @@ class GameplayState(State):
             self.vignette_radius -= 800 * dt  # Velocidade de fechamento
             if self.vignette_radius <= 0:
                 # Redimensionar a imagem da superfície para o tamanho da tela
-                width, height = pygame.display.get_surface().get_size()
+                width, height = settings.WINDOW_WIDTH, settings.WINDOW_HEIGHT
                 scaled_surface = pygame.transform.scale(self.surface_image, (width, height))
 
                 # Transição para o próximo estado
