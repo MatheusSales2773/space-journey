@@ -70,7 +70,7 @@ class GameplayState(State):
         
         self.total_distance = self.distance * 1_000  # Converter para metros
         self.distance_remain = self.total_distance
-        self.ship_speed = 500_000_00
+        self.ship_speed = 8_500_000_00
 
         # ─── 5. Estado do jogador ───────────────────────────────────
         self.score = 0
@@ -202,10 +202,40 @@ class GameplayState(State):
         width, height = screen.get_size()
         
         screen.fill((10, 10, 10))
-        
-        for star in self.stars:
-            pos = (int(star["x"]), int(star["y"]))
-            pygame.draw.circle(screen, (255, 255, 255), pos, star["r"])
+
+        # Desenhar o foguete durante a animação
+        if self.transition_stage == 1:
+            screen.fill((0, 0, 0))  # Limpar a tela
+            screen.blit(self.spaceship.image, self.spaceship.rect)
+            return  # Não desenhar mais nada durante a animação do foguete
+
+        # Desenhar elementos do jogo apenas se não estiver em transição
+        if self.transition_stage == 0:
+            # estrelas
+            for star in self.stars:
+                pos = (int(star["x"]), int(star["y"]))
+                pygame.draw.circle(screen, (255, 255, 255), pos, star["r"])
+
+            # elementos do jogo
+            self.asteroids.draw(screen)
+            self.bullets.draw(screen)
+            screen.blit(self.spaceship.image, self.spaceship.rect)
+            self.explosions.draw(screen)
+            
+            # Atualizar a posição do foguete com limites
+            self.spaceship.rect.x = max(0, min(self.spaceship.rect.x, settings.WINDOW_WIDTH - self.spaceship.rect.width))
+            self.spaceship.rect.y = max(0, min(self.spaceship.rect.y, settings.WINDOW_HEIGHT - self.spaceship.rect.height))
+
+        # Desenhar a vinheta durante a transição
+        if self.transition_stage == 2:
+            vignette_surface = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
+            pygame.draw.circle(
+                vignette_surface,
+                (0, 0, 0, 255),
+                (settings.WINDOW_WIDTH // 2, settings.WINDOW_HEIGHT // 2),
+                max(0, int(self.vignette_radius))
+            )
+            screen.blit(vignette_surface, (0, 0))
 
         self.asteroids.draw(screen)
         self.bullets.draw(screen)
