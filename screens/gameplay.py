@@ -255,31 +255,15 @@ class GameplayState(State):
 
     def draw(self, screen):
         width, height = screen.get_size()
-        
-        screen.fill((10, 10, 10))
+
+        # Limpar a tela
+        screen.fill((0, 0, 0))
 
         # Desenhar o foguete durante a animação
         if self.transition_stage == 1:
             screen.fill((0, 0, 0))  # Limpar a tela
             screen.blit(self.spaceship.image, self.spaceship.rect)
             return  # Não desenhar mais nada durante a animação do foguete
-
-        # Desenhar elementos do jogo apenas se não estiver em transição
-        if self.transition_stage == 0:
-            # estrelas
-            for star in self.stars:
-                pos = (int(star["x"]), int(star["y"]))
-                pygame.draw.circle(screen, (255, 255, 255), pos, star["r"])
-
-            # elementos do jogo
-            self.asteroids.draw(screen)
-            self.bullets.draw(screen)
-            screen.blit(self.spaceship.image, self.spaceship.rect)
-            self.explosions.draw(screen)
-            
-            # Atualizar a posição do foguete com limites
-            self.spaceship.rect.x = max(0, min(self.spaceship.rect.x, settings.WINDOW_WIDTH - self.spaceship.rect.width))
-            self.spaceship.rect.y = max(0, min(self.spaceship.rect.y, settings.WINDOW_HEIGHT - self.spaceship.rect.height))
 
         # Desenhar a vinheta durante a transição
         if self.transition_stage == 2:
@@ -298,10 +282,24 @@ class GameplayState(State):
             
             # Renderizar a vinheta na tela
             screen.blit(vignette_surface, (0, 0))
+            return  # Não desenhar mais nada durante a transição
 
-        self.asteroids.draw(screen)
-        self.bullets.draw(screen)
-        screen.blit(self.spaceship.image, self.spaceship.rect)
-        self.explosions.draw(screen)
+        # Desenhar elementos do jogo apenas se não estiver em transição
+        if self.transition_stage == 0:
+            # Estrelas
+            for star in self.stars:
+                pos = (int(star["x"]), int(star["y"]))
+                pygame.draw.circle(screen, (255, 255, 255), pos, star["r"])
 
+            # Elementos do jogo
+            self.asteroids.draw(screen)
+            self.bullets.draw(screen)
+            screen.blit(self.spaceship.image, self.spaceship.rect)
+            self.explosions.draw(screen)
+
+            # Atualizar a posição do foguete com limites
+            self.spaceship.rect.x = max(0, min(self.spaceship.rect.x, settings.WINDOW_WIDTH - self.spaceship.rect.width))
+            self.spaceship.rect.y = max(0, min(self.spaceship.rect.y, settings.WINDOW_HEIGHT - self.spaceship.rect.height))
+
+        # Desenhar HUD
         self.hud.draw(screen, self.lives, width, height)

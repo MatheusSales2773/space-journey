@@ -15,8 +15,8 @@ class JourneyProgress:
         self.width = 1000
         self.height = 100
 
-        self.start_icon = start_icon
-        self.end_icon = end_icon
+        self.start_icon = end_icon
+        self.end_icon = start_icon
         self.font = pygame.font.Font(settings.FONT_ALT_EXPANDED_PATH, settings.FONT_SIZE_SMALL)
         self.alt_font = pygame.font.Font(settings.FONT_ALT_EXPANDED_PATH, settings.FONT_SIZE_GAME)
         self.traveled_color = traveled_color
