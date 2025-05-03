@@ -18,6 +18,12 @@ class SpaceshipStatsGauge:
     def update_lives(self, lives):
         pass
 
+    def set_speed(self, speed):
+        self.speed = speed
+
+    def set_altitude(self, altitude):
+        self.altitude = altitude
+
     def draw(self, surface, padding=42):
         screen_w, screen_h = surface.get_size()
         hud_w, hud_h = self.bg_image.get_size()
@@ -29,11 +35,13 @@ class SpaceshipStatsGauge:
 
         # Altitude
         altitude_label = self.font.render("ALTITUDE", True, (201, 201, 201))
-        altitude_label_rect = altitude_label.get_rect(midleft=(self.x + 70, self.y + 30))
+        altitude_label_rect = altitude_label.get_rect(midleft=(self.x + 50, self.y + 30))
         surface.blit(altitude_label, altitude_label_rect)
 
-        speed_text = self.text.render(str(self.altitude) + " KM", True, (255, 255, 255))
-        speed_text_rect = speed_text.get_rect(midleft=(self.x + 170, self.y + 32))
+        altitude_int = int(self.altitude)
+
+        speed_text = self.text.render(str(altitude_int) + " KM", True, (255, 255, 255))
+        speed_text_rect = speed_text.get_rect(midright=(self.x + 240, self.y + 32))
         surface.blit(speed_text, speed_text_rect)
 
         # Speed

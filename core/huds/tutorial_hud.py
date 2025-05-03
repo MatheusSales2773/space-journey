@@ -36,6 +36,13 @@ class TutorialHUD:
         self.target_gauge.set_position(20, 0)
         self.stats_gauge.set_position(20, 20)
 
+    def update(self, speed, altitude, is_scrolling):
+        self.speed = speed
+        self.altitude = altitude
+        self.is_scrolling = is_scrolling
+
+        self.stats_gauge.set_altitude(altitude)
+        self.stats_gauge.set_speed(speed)
 
     def draw(self, screen):
         width, height = screen.get_size()

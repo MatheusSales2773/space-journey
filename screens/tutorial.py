@@ -11,6 +11,7 @@ class TutorialState(State):
         self.manager      = manager
         self.scroll_speed = 250
         self.is_scrolling = False
+        self.altitude = 0
 
         screen_w, screen_h = pygame.display.get_surface().get_size()
 
@@ -33,7 +34,7 @@ class TutorialState(State):
         # Guarda altura da tela e calcula offset máximo
         self.screen_h   = screen_h
         self.max_offset = max(0, self.tutorial_img.get_height() - screen_h)
-        # Começa mostrando o final da imagem (offset máximo)
+
         self.y_offset   = self.max_offset
 
         self.font = pygame.font.Font(settings.FONT_PATH, settings.FONT_SIZE_GAME)
@@ -43,10 +44,9 @@ class TutorialState(State):
 
         self.hud = TutorialHUD(
             speed=self.scroll_speed,
-            is_scrolling=self.is_scrolling,
-            altitude=0
+            altitude=self.altitude,
+            is_scrolling=self.is_scrolling
         )
-
 
     def handle_events(self, events):
         for e in events:
@@ -62,6 +62,18 @@ class TutorialState(State):
             self.y_offset -= self.scroll_speed * dt
             if self.y_offset < 0:
                 self.y_offset = 0
+
+        if self.max_offset > 0:
+            progress = (self.max_offset - self.y_offset) / self.max_offset
+        else:
+            progress = 1.0
+        self.altitude = progress * 100.0
+
+        self.hud.update(
+            self.scroll_speed,
+            self.altitude,
+            self.is_scrolling
+        )
 
     def draw(self, screen):
         screen.blit(self.tutorial_img, (0, -int(self.y_offset)))
