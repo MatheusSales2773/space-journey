@@ -14,12 +14,13 @@ class TargetGauge:
         self.x = x
         self.y = y
 
-    def draw(self, surface, padding=42):
-        screen_w, screen_h = surface.get_size()
-        hud_w, hud_h = self.bg_image.get_size()
+    def draw(self, surface, padding=42, use_preset_position=False):
+        if not use_preset_position:
+            screen_w, screen_h = surface.get_size()
+            hud_w, hud_h = self.bg_image.get_size()
 
-        self.x = padding
-        self.y = screen_h - hud_h - padding
+            self.x = padding
+            self.y = screen_h - hud_h - padding
 
         # Fundo
         surface.blit(self.bg_image, (self.x, self.y))

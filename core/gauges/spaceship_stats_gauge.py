@@ -24,12 +24,13 @@ class SpaceshipStatsGauge:
     def set_altitude(self, altitude):
         self.altitude = altitude
 
-    def draw(self, surface, padding=42):
-        screen_w, screen_h = surface.get_size()
-        hud_w, hud_h = self.bg_image.get_size()
+    def draw(self, surface, padding=42, use_preset_position=False):
+        if not use_preset_position:
+            screen_w, screen_h = surface.get_size()
+            hud_w, hud_h = self.bg_image.get_size()
 
-        self.x = screen_w - hud_w - padding
-        self.y = screen_h - hud_h - padding
+            self.x = screen_w - hud_w - padding
+            self.y = screen_h - hud_h - padding
 
         surface.blit(self.bg_image, (self.x, self.y))
 
@@ -54,4 +55,3 @@ class SpaceshipStatsGauge:
         altitude_text = self.text.render(str(speed_int) + " KM/H", True, (255, 255, 255))
         altitude_text_rect = altitude_text.get_rect(midright=(self.x + 220, self.y + 74))
         surface.blit(altitude_text, altitude_text_rect)
-

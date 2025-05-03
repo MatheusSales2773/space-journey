@@ -4,6 +4,7 @@ from core.gauges.spaceship_stats_gauge import SpaceshipStatsGauge
 from core.gauges.tagert_gauge import TargetGauge
 from config import settings
 
+
 class TutorialHUD:
     def __init__(self, speed, altitude, is_scrolling):
         self.screen = pygame.display.get_surface()
@@ -39,6 +40,12 @@ class TutorialHUD:
         self.target_gauge.set_position(20, 0)
         self.stats_gauge.set_position(20, 20)
 
+        # Variáveis para a animação
+        self.animation_active = False
+        self.animation_progress = 0.0
+        self.animation_speed = 1.5
+        self.animation_offset = 300
+
         self.hint_text = "PRESSIONE ESPAÇO PARA LANÇAR"
         self.highlight = "ESPAÇO"
         self.hint_padding = 6
@@ -46,10 +53,21 @@ class TutorialHUD:
     def update(self, speed, altitude, is_scrolling):
         self.speed = speed
         self.altitude = altitude
+
+        if is_scrolling and not self.is_scrolling:
+            self.animation_active = True
+            self.animation_progress = 0.0
+
         self.is_scrolling = is_scrolling
 
         self.stats_gauge.set_altitude(altitude)
         self.stats_gauge.set_speed(speed)
+
+        if self.animation_active and self.animation_progress < 1.0:
+            self.animation_progress += self.animation_speed * (1 / 60)
+            if self.animation_progress >= 1.0:
+                self.animation_progress = 1.0
+                self.animation_active = False
 
     def _draw_hint(self, surface, w, h):
         before, after = self.hint_text.split(self.highlight)
@@ -121,10 +139,8 @@ class TutorialHUD:
 
         screen.blit(self.hud_overlay, self.hud_overlay_rect)
 
-        self.target_gauge.draw(screen)
-        self.stats_gauge.draw(screen)
-
-        notice = self.notice_font.render("As distâncias, velocidades e proporções apresentadas são ilustrativas", True, (94, 169, 197))
+        notice = self.notice_font.render("As distâncias, velocidades e proporções apresentadas são ilustrativas", True,
+                                         (94, 169, 197))
         notice_rect = notice.get_rect(topleft=(30, 30))
 
         notice_s = self.notice_font.render(
@@ -135,6 +151,25 @@ class TutorialHUD:
         if self.is_scrolling:
             screen.blit(notice, notice_rect)
             screen.blit(notice_s, notice_rect_s)
+
+            if self.animation_active or self.animation_progress > 0:
+                animation_offset = (1 - self.animation_progress) * self.animation_offset
+
+                target_w, target_h = self.target_gauge.bg_image.get_size()
+                stats_w, stats_h = self.stats_gauge.bg_image.get_size()
+
+                self.target_gauge.set_position(
+                    40,
+                    height - target_h - 40 + animation_offset
+                )
+
+                self.stats_gauge.set_position(
+                    width - stats_w - 40,
+                    height - stats_h - 40 + animation_offset
+                )
+
+                self.target_gauge.draw(screen, use_preset_position=True)
+                self.stats_gauge.draw(screen, use_preset_position=True)
 
         if not self.is_scrolling:
             self._draw_hint(screen, width, height)
