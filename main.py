@@ -25,6 +25,11 @@ def main():
 
     pygame.display.set_caption("Jornada Espacial")
     clock = pygame.time.Clock()
+    
+    # Inicializar o gerenciador de estados
+    state_manager = StateManager(MenuState(None))
+    state_manager.current_state.manager = state_manager
+    
     running = True
 
     state_manager = StateManager(MenuState(None))
@@ -32,9 +37,10 @@ def main():
     state_manager.set_state(MenuState(state_manager))
 
     while running:
-        dt = clock.tick(60) / 1000 
-        events = pygame.event.get()
+        dt = clock.tick(settings.FPS) / 1000 
 
+        # Processar eventos
+        events = pygame.event.get()
         for event in events:
             if event.type == pygame.QUIT:
                 running = False

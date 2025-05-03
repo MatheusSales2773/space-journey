@@ -31,13 +31,16 @@ class GameplayState(State):
         self.rocket_animation_timer = 0  # Temporizador para a animação
         
         self.rocket_target = (settings.WINDOW_WIDTH // 2, settings.WINDOW_HEIGHT // 2)  # Centro da tela
-        self.rocket_exit_speed = 500  # Velocidade de saída do foguete
+        self.rocket_exit_speed = 700  # Velocidade de saída do foguete
         self.rocket_direction = None  # Direção do movimento do foguete
         
         # Multiplicador global para aumentar a velocidade das fases
         global_speed_multiplier = 6500.0  # Aumente este valor para acelerar mais as fases, mudem aqui se necessário
         self.speed = speed * global_speed_multiplier
 
+        # Duração do impacto
+        self.hit_duration = 1.0  # Duração do impacto em segundos
+        
         # ─── 1. Font e sons ─────────────────────────────────────
         self.font = pygame.font.Font(settings.FONT_PATH, settings.FONT_SIZE_GAME)
         self.font_alt = pygame.font.Font(settings.FONT_ALT_PATH, settings.FONT_SIZE_SMALL)
@@ -135,6 +138,63 @@ class GameplayState(State):
                     print("Clique detectado (implementar lógica, se necessário)")
 
     def update(self, dt):
+        # Verificar se a jornada foi concluída
+        if self.distance_remain <= 0 and not self.rocket_animation_active:
+            print("Jornada concluída! Iniciando animação do foguete.")  # Depuração
+            self.rocket_animation_active = True
+            self.rocket_animation_timer = 0
+            self.transition_stage = 1  # Iniciar a animação do foguete
+            return  # Interromper outras atualizações
+
+        # Priorizar a animação do foguete e a vinheta
+        if self.transition_stage == 1:  # Animação do foguete
+            if self.rocket_direction is None:
+                # Calcular direção para o centro da tela
+                dx = self.rocket_target[0] - self.spaceship.rect.centerx
+                dy = self.rocket_target[1] - self.spaceship.rect.centery
+                distance = math.sqrt(dx**2 + dy**2)
+                self.rocket_direction = (dx / distance, dy / distance)  # Vetor unitário
+
+            # Mover o foguete em direção ao centro
+            self.spaceship.rect.x += self.rocket_direction[0] * self.rocket_exit_speed * dt
+            self.spaceship.rect.y += self.rocket_direction[1] * self.rocket_exit_speed * dt
+
+            # Verificar se o foguete chegou ao centro
+            if math.hypot(
+                self.spaceship.rect.centerx - self.rocket_target[0],
+                self.spaceship.rect.centery - self.rocket_target[1]
+            ) < 10:  # Tolerância de 10 pixels
+                print("Foguete chegou ao centro. Saindo da tela.")  # Depuração
+                self.rocket_direction = (0, -1)  # Vetor unitário para cima
+
+            # Mover o foguete para cima após atingir o centro
+            self.spaceship.rect.x += self.rocket_direction[0] * self.rocket_exit_speed * dt
+            self.spaceship.rect.y += self.rocket_direction[1] * self.rocket_exit_speed * dt
+
+            # Verificar se o foguete saiu completamente da tela
+            if self.spaceship.rect.bottom < 0:  # Saiu pela parte superior
+                print("Foguete saiu da tela. Iniciando transição.")  # Depuração
+                self.transition_stage = 2  # Passar para a próxima etapa
+            return  # Interromper outras atualizações
+
+        elif self.transition_stage == 2:  # Animação da vinheta fechando
+            self.vignette_radius -= 800 * dt  # Velocidade de fechamento
+            if self.vignette_radius <= 0:
+                print("Vinheta fechada. Transição para o próximo estado.")  # Depuração
+                # Redimensionar a imagem da superfície para o tamanho da tela
+                width, height = settings.WINDOW_WIDTH, settings.WINDOW_HEIGHT
+                scaled_surface = pygame.transform.scale(self.surface_image, (width, height))
+
+                # Transição para o próximo estado
+                self.manager.set_state(PlanetTransitionState(
+                    self.manager,
+                    self.planet_name,
+                    scaled_surface,  # Usar a imagem redimensionada
+                    self.curiosity
+                ))
+            return  # Interromper outras atualizações
+
+        # Atualizações normais do jogo (apenas se não estiver em transição)
         pressed_keys = pygame.key.get_pressed()
         self.spaceship.update(pressed_keys)
         self.bullets.update()
@@ -147,20 +207,20 @@ class GameplayState(State):
             asteroid = Asteroid(self.asteroid_image, width)
             self.asteroids.add(asteroid)
             self.time_since_last_asteroid -= self.asteroid_spawn_gap
-        
+
         travelled = self.ship_speed * dt
         self.distance_remain = max(0, self.distance_remain - travelled)
 
         percent = (1 - self.distance_remain / self.total_distance) * 100
-
         dist_km = self.distance_remain / 1_000
-        dist_str = f"{dist_km/1e6:.3f} milhões de km"
+        dist_str = f"{dist_km / 1e6:.3f} milhões de km"
         self.progress.set_progress(percent, dist_str)
+
         collisions = pygame.sprite.groupcollide(
-            self.asteroids,    
-            self.bullets,     
-            True,              
-            True               
+            self.asteroids,
+            self.bullets,
+            True,
+            True
         )
 
         if collisions:
@@ -171,15 +231,7 @@ class GameplayState(State):
 
         self.explosions.update(dt)
 
-        travelled = self.ship_speed * dt
-        self.distance_remain = max(0, self.distance_remain - travelled)
-
-        percent = (1 - self.distance_remain / self.total_distance) * 100
-        dist_km = self.distance_remain / 1_000
-        dist_str = f"{dist_km / 1e6:.3f} milhões de km"
-        self.progress.set_progress(percent, dist_str)
-
-        # atualizar estelas
+        # Atualizar estrelas
         width, height = pygame.display.get_surface().get_size()
         for star in self.stars:
             star["y"] += star["speed"] * dt
@@ -197,88 +249,6 @@ class GameplayState(State):
 
             if self.lives <= 0:
                 self.manager.set_state(GameOverState(self.manager))
-        # Verificar se a jornada foi concluída
-            if self.distance_remain <= 0 and not self.rocket_animation_active:
-                self.rocket_animation_active = True
-                self.rocket_animation_timer = 0
-                self.transition_stage = 1  # Iniciar a animação do foguete
-            pass
-        
-        # Animação do foguete indo para o centro e saindo da tela
-        elif self.transition_stage == 1:  # Animação do foguete
-            if self.rocket_direction is None:
-                # Calcular direção para o centro da tela
-                dx = self.rocket_target[0] - self.spaceship.rect.centerx
-                dy = self.rocket_target[1] - self.spaceship.rect.centery
-                distance = math.sqrt(dx**2 + dy**2)
-                self.rocket_direction = (dx / distance, dy / distance)  # Vetor unitário
-
-            # Mover o foguete em direção ao centro
-            self.spaceship.rect.x += self.rocket_direction[0] * self.rocket_exit_speed * dt
-            self.spaceship.rect.y += self.rocket_direction[1] * self.rocket_exit_speed * dt
-            
-            # Garantir que o foguete permaneça dentro dos limites da tela
-            self.spaceship.rect.x = max(0, min(self.spaceship.rect.x, settings.WINDOW_WIDTH - self.spaceship.rect.width))
-            self.spaceship.rect.y = max(0, min(self.spaceship.rect.y, settings.WINDOW_HEIGHT - self.spaceship.rect.height))
-
-            # Verificar se o foguete chegou ao centro
-            if math.hypot(
-                self.spaceship.rect.centerx - self.rocket_target[0],
-                self.spaceship.rect.centery - self.rocket_target[1]
-            ) < 10:  # Tolerância de 10 pixels
-                # Calcular direção para fora da tela (diagonal nordeste)
-                self.rocket_direction = (0, -1)  # Vetor unitário para cima
-                self.transition_stage = 2  # Passar para a próxima etapa
-                
-            # Mover o foguete para cima após atingir o centro
-            self.spaceship.rect.x += self.rocket_direction[0] * self.rocket_exit_speed * dt
-            self.spaceship.rect.y += self.rocket_direction[1] * self.rocket_exit_speed * dt
-            
-            # Verificar se o foguete saiu completamente da tela
-            if self.spaceship.rect.bottom < 0:  # Saiu pela parte superior
-                self.transition_stage = 2  # Passar para a próxima etapa
-                
-        # Animação da vinheta fechando
-        elif self.transition_stage == 2:
-            self.vignette_radius -= 800 * dt  # Velocidade de fechamento
-            if self.vignette_radius <= 0:
-                # Redimensionar a imagem da superfície para o tamanho da tela
-                width, height = settings.WINDOW_WIDTH, settings.WINDOW_HEIGHT
-                scaled_surface = pygame.transform.scale(self.surface_image, (width, height))
-
-                # Transição para o próximo estado
-                self.manager.set_state(PlanetTransitionState(
-                    self.manager,
-                    self.planet_name,
-                    scaled_surface,  # Usar a imagem redimensionada
-                    self.curiosity
-        ))
-
-        # Atualizar o progresso
-        percent = (1 - self.distance_remain / self.total_distance) * 100
-        dist_km = self.distance_remain / 1_000
-        dist_str = f"{dist_km / 1e6:.3f} milhões de km"
-        self.progress.set_progress(percent, dist_str)
-
-        # atualizar estelas
-        width, height = pygame.display.get_surface().get_size()
-        for star in self.stars:
-            star["y"] += star["speed"] * dt
-            if star["y"] > height:
-                star["y"] = 0
-                star["x"] = random.uniform(0, width)
-
-        spaceship_hits = pygame.sprite.spritecollide(self.spaceship, self.asteroids, True)
-        if spaceship_hits:
-            for _ in spaceship_hits:
-                self.lives -= 1
-                self.hit_timer = self.hit_duration
-                exp = Explosion(self.explosion_frames, self.spaceship.rect.center)
-                self.explosions.add(exp)
-
-        # Verificar se o player perdeu todas as vidas
-        if self.lives <= 0:
-            self.manager.set_state(GameOverState(self.manager))
 
 
     def draw(self, screen):
@@ -312,12 +282,19 @@ class GameplayState(State):
         # Desenhar a vinheta durante a transição
         if self.transition_stage == 2:
             vignette_surface = pygame.Surface(screen.get_size(), pygame.SRCALPHA)
+            
+            # Desenhar o círculo da vinheta
             pygame.draw.circle(
                 vignette_surface,
-                (0, 0, 0, 255),
-                (settings.WINDOW_WIDTH // 2, settings.WINDOW_HEIGHT // 2),
-                max(0, int(self.vignette_radius))
+                (0, 0, 0, 255),  # Cor preta com opacidade total
+                (settings.WINDOW_WIDTH // 2, settings.WINDOW_HEIGHT // 2),  # Centro da tela
+                max(0, int(self.vignette_radius))  # Raio da vinheta
             )
+            
+            # Preencher o restante da tela com preto
+            vignette_surface.fill((0, 0, 0, 255), special_flags=pygame.BLEND_RGBA_MIN)
+            
+            # Renderizar a vinheta na tela
             screen.blit(vignette_surface, (0, 0))
 
         self.asteroids.draw(screen)
