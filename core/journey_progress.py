@@ -6,7 +6,7 @@ class JourneyProgress:
         self,
         start_icon,
         end_icon,
-        traveled_color=(95,254,255),
+        traveled_color=(228,134,78),
         remaining_color=(40,40,40)
     ):
         self.x = 0
@@ -38,9 +38,9 @@ class JourneyProgress:
 
     def draw(self, surface: pygame.Surface):
         # Padding interno e margens
-        padding = 2  # margem superior
+        padding = 4  # margem superior
         icon_margin = 170  # espaço antes e depois dos ícones
-        bar_margin = 15   # margem entre ícone e início/barra
+        bar_margin = 10   # margem entre ícone e início/barra
 
         margin_text_bar = 20   # espaço entre texto de distância e barra
         margin_bar_text = 10   # espaço entre barra e texto de porcentagem
@@ -102,7 +102,7 @@ class JourneyProgress:
         surface.blit(self.indicator_img, (ax, ay))
 
         # Texto de porcentagem 
-        perc_surf = self.font.render(f"{self.percent:.0f}%", True, (95,254,255))
+        perc_surf = self.font.render(f"{self.percent:.0f}%", True, (228,134,78))
         pr = perc_surf.get_rect(
             center=(bar_x + trav_w, bar_y + bar_h + margin_bar_text + text_below / 2)
         )
