@@ -15,7 +15,7 @@ class LevelSelectionState(State):
              "curiosity": "Mercúrio é o menor planeta do sistema solar e o mais próximo do Sol.",
              "surface_image": "assets/images/surfaces/mercury_surface.png"},
             # Vênus
-            {"name": "Vênus", "image": "assets/images/earth.png", "distance": 41_000_000, "speed": 250_000,
+            {"name": "Vênus", "image": "assets/images/venus.png", "distance": 41_000_000, "speed": 250_000,
              "curiosity": "Mercúrio é o menor planeta do sistema solar e o mais próximo do Sol.",
              "surface_image": "assets/images/surfaces/mercury_surface.png"}, # mudar imagem
             # Terra
@@ -27,7 +27,7 @@ class LevelSelectionState(State):
              "curiosity": "O planeta vermelho é conhecido por suas tempestades de poeira.",
              "surface_image": "assets/images/surfaces/mercury_surface.png"}, # mudar imagem
             # Júpiter
-            {"name": "Júpiter", "image": "assets/images/earth.png", "distance": 628_000_000, "speed": 500_000,
+            {"name": "Júpiter", "image": "assets/images/jupiter.png", "distance": 628_000_000, "speed": 500_000,
              "curiosity": "Mercúrio é o menor planeta do sistema solar e o mais próximo do Sol.",
              "surface_image": "assets/images/surfaces/mercury_surface.png"}, # mudar imagem
             # Saturno
