@@ -140,7 +140,6 @@ class GameplayState(State):
     def update(self, dt):
         # Verificar se a jornada foi concluída
         if self.distance_remain <= 0 and not self.rocket_animation_active:
-            print("Jornada concluída! Iniciando animação do foguete.")  # Depuração
             self.rocket_animation_active = True
             self.transition_stage = 1  # Iniciar a animação do foguete
             self.rocket_direction = None  # Resetar a direção do foguete
@@ -151,24 +150,20 @@ class GameplayState(State):
             # Mover o foguete para o centro da tela
             if self.rocket_direction is None:
                 if self.spaceship.update_to_center(self.rocket_target[0], self.rocket_target[1], self.rocket_exit_speed, dt):
-                    print("Foguete chegou ao centro. Ajustando direção para cima.")  # Depuração
                     self.rocket_direction = (0, -1)  # Vetor unitário para cima
 
             # Mover o foguete para cima após atingir o centro
             if self.rocket_direction is not None:
-                print(f"Movendo foguete para cima: {self.rocket_direction}")  # Depuração
                 self.spaceship.rect.y += int(self.rocket_direction[1] * self.rocket_exit_speed * dt)
 
             # Verificar se o foguete saiu completamente da tela
             if self.spaceship.rect.bottom < 0:  # Saiu pela parte superior
-                print("Foguete saiu da tela. Iniciando transição.")  # Depuração
                 self.transition_stage = 2  # Passar para a próxima etapa
             return  # Interromper outras atualizações
 
         elif self.transition_stage == 2:  # Animação da vinheta fechando
             self.vignette_radius -= 800 * dt  # Velocidade de fechamento
             if self.vignette_radius <= 0:
-                print("Vinheta fechada. Transição para o próximo estado.")  # Depuração
                 # Redimensionar a imagem da superfície para o tamanho da tela
                 width, height = settings.WINDOW_WIDTH, settings.WINDOW_HEIGHT
                 scaled_surface = pygame.transform.scale(self.surface_image, (width, height))
