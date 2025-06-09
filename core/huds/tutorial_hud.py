@@ -4,12 +4,19 @@ from core.gauges.spaceship_stats_gauge import SpaceshipStatsGauge
 from core.gauges.tagert_gauge import TargetGauge
 from config import settings
 
+
 class TutorialHUD:
     def __init__(self, speed, altitude, is_scrolling):
         self.screen = pygame.display.get_surface()
         self.speed = speed
         self.altitude = altitude
         self.is_scrolling = is_scrolling
+
+        # CONTAGEM REGRESSIVA
+        self.countdown_active = False
+        self.countdown_start = 0  # timestamp em ms
+        self.countdown_duration = 3000  # 3 segundos
+        self.countdown_font = pygame.font.Font(settings.FONT_ALT_PATH, 96)
 
         self.font = pygame.font.Font(settings.FONT_ALT_PATH, settings.FONT_SIZE_SMALL)
         self.notice_font = pygame.font.Font(settings.FONT_ALT_PATH, 18)
@@ -39,17 +46,56 @@ class TutorialHUD:
         self.target_gauge.set_position(20, 0)
         self.stats_gauge.set_position(20, 20)
 
+        # Variáveis para a animação
+        self.animation_active = False
+        self.animation_progress = 0.0
+        self.animation_speed = 1.5
+        self.animation_offset = 300
+
         self.hint_text = "PRESSIONE ESPAÇO PARA LANÇAR"
         self.highlight = "ESPAÇO"
         self.hint_padding = 6
 
+    def start_countdown(self):
+        """Chamar quando o usuário pressiona SPACE pela primeira vez."""
+        if not self.countdown_active and not self.is_scrolling:
+            self.countdown_active = True
+            self.countdown_start = pygame.time.get_ticks()
+
     def update(self, speed, altitude, is_scrolling):
         self.speed = speed
         self.altitude = altitude
-        self.is_scrolling = is_scrolling
 
+        # Verifica se o scrolling acabou de começar (seja por input externo ou pelo countdown)
+        scrolling_just_started = is_scrolling and not self.is_scrolling
+
+        # gerencia transição do countdown → scroll
+        if self.countdown_active:
+            elapsed = pygame.time.get_ticks() - self.countdown_start
+            if elapsed >= self.countdown_duration:
+                self.countdown_active = False
+                self.is_scrolling = True
+                # Marca que o scrolling está começando agora
+                scrolling_just_started = True
+        else:
+            # só sincroniza is_scrolling se o countdown não estiver ativo
+            self.is_scrolling = is_scrolling
+
+        # Inicia a animação dos gauges quando o scrolling começa
+        if scrolling_just_started:
+            self.animation_active = True
+            self.animation_progress = 0.0
+
+        # atualiza gauges
         self.stats_gauge.set_altitude(altitude)
         self.stats_gauge.set_speed(speed)
+
+        # Atualiza a animação se estiver ativa
+        if self.animation_active and self.animation_progress < 1.0:
+            self.animation_progress += self.animation_speed * (1 / 60)
+            if self.animation_progress >= 1.0:
+                self.animation_progress = 1.0
+                self.animation_active = False
 
     def _draw_hint(self, surface, w, h):
         before, after = self.hint_text.split(self.highlight)
@@ -121,10 +167,19 @@ class TutorialHUD:
 
         screen.blit(self.hud_overlay, self.hud_overlay_rect)
 
-        self.target_gauge.draw(screen)
-        self.stats_gauge.draw(screen)
+        # Apenas desenha o contador quando estiver ativo
+        if self.countdown_active:
+            now = pygame.time.get_ticks()
+            rem = self.countdown_duration - (now - self.countdown_start)
+            sec = max(1, int(rem // 1000) + 1)
+            txt = self.countdown_font.render(str(sec), True, (255, 255, 255))
+            rect = txt.get_rect(center=(width // 2, height // 2))
+            screen.blit(txt, rect)
+            # Continua o processamento (não faz return)
 
-        notice = self.notice_font.render("As distâncias, velocidades e proporções apresentadas são ilustrativas", True, (94, 169, 197))
+        # Aviso sobre escalas proporcionais
+        notice = self.notice_font.render("As distâncias, velocidades e proporções apresentadas são ilustrativas", True,
+                                         (94, 169, 197))
         notice_rect = notice.get_rect(topleft=(30, 30))
 
         notice_s = self.notice_font.render(
@@ -136,5 +191,26 @@ class TutorialHUD:
             screen.blit(notice, notice_rect)
             screen.blit(notice_s, notice_rect_s)
 
-        if not self.is_scrolling:
+            # Sempre que o scrolling estiver ativo, desenha os gauges com animação
+            if self.animation_active or self.animation_progress > 0:
+                animation_offset = (1 - self.animation_progress) * self.animation_offset
+
+                target_w, target_h = self.target_gauge.bg_image.get_size()
+                stats_w, stats_h = self.stats_gauge.bg_image.get_size()
+
+                self.target_gauge.set_position(
+                    40,
+                    height - target_h - 40 + animation_offset
+                )
+
+                self.stats_gauge.set_position(
+                    width - stats_w - 40,
+                    height - stats_h - 40 + animation_offset
+                )
+
+                self.target_gauge.draw(screen, use_preset_position=True)
+                self.stats_gauge.draw(screen, use_preset_position=True)
+
+        # Mostra dica apenas quando não estiver scrolling e não estiver em countdown
+        if not self.is_scrolling and not self.countdown_active:
             self._draw_hint(screen, width, height)

@@ -5,10 +5,11 @@ from core.huds.tutorial_hud import TutorialHUD
 from core.state_manager import State
 from screens.gameplay import GameplayState
 
+
 class TutorialState(State):
     def __init__(self, manager):
         super().__init__()
-        self.manager      = manager
+        self.manager = manager
 
         screen_w, screen_h = pygame.display.get_surface().get_size()
 
@@ -29,10 +30,10 @@ class TutorialState(State):
         )
 
         # Guarda altura da tela e calcula offset máximo
-        self.screen_h   = screen_h
+        self.screen_h = screen_h
         self.max_offset = max(0, self.tutorial_img.get_height() - screen_h)
 
-        self.y_offset   = self.max_offset
+        self.y_offset = self.max_offset
 
         self.is_scrolling = False
         self.current_speed = 0.0
@@ -48,21 +49,25 @@ class TutorialState(State):
 
         self.hud = TutorialHUD(
             speed=0,
-            altitude=False,
-            is_scrolling=0
+            altitude=0,
+            is_scrolling=False
         )
 
     def handle_events(self, events):
         for e in events:
             if e.type == pygame.KEYDOWN:
                 if e.key == pygame.K_SPACE and not self.is_scrolling:
-                    self.is_scrolling = True
+                    # Inicia o countdown em vez de iniciar o scrolling diretamente
+                    self.hud.start_countdown()
                     self.msg = self.start_msg
                 elif e.key in (pygame.K_RETURN, pygame.K_ESCAPE) and self.y_offset == 0:
                     self.manager.set_state(GameplayState(self.manager))
 
     def update(self, dt):
-        if self.is_scrolling and self.y_offset > 0:
+        if self.hud.is_scrolling and self.y_offset > 0:
+            # Atualiza is_scrolling local com base no HUD
+            self.is_scrolling = True
+
             if self.current_speed < self.target_speed:
                 self.current_speed = min(
                     self.target_speed,
@@ -84,7 +89,7 @@ class TutorialState(State):
     def draw(self, screen):
         screen.blit(self.tutorial_img, (0, -int(self.y_offset)))
 
-        if self.y_offset == 0:
+        if self.y_offset == 0 and not self.hud.countdown_active:
             text_surf = self.font.render(self.msg, True, (255, 255, 255))
             text_rect = text_surf.get_rect(
                 midbottom=(screen.get_width() // 2, self.screen_h - 20)
