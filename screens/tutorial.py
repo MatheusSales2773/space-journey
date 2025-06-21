@@ -43,6 +43,7 @@ class TutorialState(State):
         self.acceleration = self.target_speed / accel_time
 
         self.font = pygame.font.Font(settings.FONT_PATH, settings.FONT_SIZE_GAME)
+        self.font_bigger = pygame.font.Font(settings.FONT_PATH, 128)
 
         self.msg = "Pressione ESPAÇO para iniciar o scroll"
         self.start_msg = "Pressione ENTER para começar"
@@ -57,7 +58,6 @@ class TutorialState(State):
         for e in events:
             if e.type == pygame.KEYDOWN:
                 if e.key == pygame.K_SPACE and not self.is_scrolling:
-                    # Inicia o countdown em vez de iniciar o scrolling diretamente
                     self.hud.start_countdown()
                     self.msg = self.start_msg
                 elif e.key in (pygame.K_RETURN, pygame.K_ESCAPE) and self.y_offset == 0:
@@ -65,7 +65,6 @@ class TutorialState(State):
 
     def update(self, dt):
         if self.hud.is_scrolling and self.y_offset > 0:
-            # Atualiza is_scrolling local com base no HUD
             self.is_scrolling = True
 
             if self.current_speed < self.target_speed:

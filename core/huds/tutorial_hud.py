@@ -16,7 +16,7 @@ class TutorialHUD:
         self.countdown_active = False
         self.countdown_start = 0  # timestamp em ms
         self.countdown_duration = 3000  # 3 segundos
-        self.countdown_font = pygame.font.Font(settings.FONT_ALT_PATH, 96)
+        self.countdown_font = pygame.font.Font(settings.FONT_ALT_PATH, 528)
 
         self.font = pygame.font.Font(settings.FONT_ALT_PATH, settings.FONT_SIZE_SMALL)
         self.notice_font = pygame.font.Font(settings.FONT_ALT_PATH, 18)
@@ -172,10 +172,17 @@ class TutorialHUD:
             now = pygame.time.get_ticks()
             rem = self.countdown_duration - (now - self.countdown_start)
             sec = max(1, int(rem // 1000) + 1)
-            txt = self.countdown_font.render(str(sec), True, (255, 255, 255))
+
+            # Texto da sombra
+            shadow_txt = self.countdown_font.render(str(sec), True, (0, 0, 0)).convert_alpha()
+            shadow_txt.set_alpha(120)
+            shadow_rect = shadow_txt.get_rect(center=(width // 2 + 3, height // 2 + 3))
+            screen.blit(shadow_txt, shadow_rect)
+
+            # Texto principal
+            txt = self.countdown_font.render(str(sec), True, (255, 255, 255)).convert_alpha()
             rect = txt.get_rect(center=(width // 2, height // 2))
             screen.blit(txt, rect)
-            # Continua o processamento (não faz return)
 
         # Aviso sobre escalas proporcionais
         notice = self.notice_font.render("As distâncias, velocidades e proporções apresentadas são ilustrativas", True,
