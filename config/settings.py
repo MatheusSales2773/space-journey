@@ -21,7 +21,7 @@ SHOOT_SOUND = "assets/audio/shoot_sound.mp3"
 SFX_VOLUME = 0.75
 
 # COnfiguração de fontes
-FONT_PATH       = "assets/fonts/Silkscreen-Regular.ttf"
+FONT_PATH       = "assets/fonts/Rajdhani-Bold.ttf"
 FONT_ALT_PATH   = "assets/fonts/Rajdhani-Bold.ttf"
 FONT_ALT_EXPANDED_PATH   = "assets/fonts/Rajdhani-Bold.ttf"
 

@@ -11,40 +11,40 @@ class LevelSelectionState(State):
 
         # Configuração dos planetas
         self.planets = [
-            {"name": "Mercúrio", "image": "assets/images/mercury.png", "distance": 77_000_000, "speed": 300_000,
+            {"name": "MERCÚRIO", "image": "assets/images/planets/mercury.png", "distance": 77_000_000, "speed": 300_000,
              "curiosity": "Mercúrio é o menor planeta do sistema solar e o mais próximo do Sol.",
              "surface_image": "assets/images/surfaces/mercury_surface.png"},
             # Vênus
-            {"name": "Vênus", "image": "assets/images/venus.png", "distance": 41_000_000, "speed": 250_000,
+            {"name": "VÊNUS", "image": "assets/images/planets/venus.png", "distance": 41_000_000, "speed": 250_000,
              "curiosity": "Mercúrio é o menor planeta do sistema solar e o mais próximo do Sol.",
              "surface_image": "assets/images/surfaces/mercury_surface.png"}, # mudar imagem
             # Terra
-            {"name": "Terra", "image": "assets/images/earth.png",
+            {"name": "TERRA", "image": "assets/images/planets/earth.png",
              "curiosity": "Mercúrio é o menor planeta do sistema solar e o mais próximo do Sol.",
              "surface_image": "assets/images/surfaces/mercury_surface.png"},
             # Marte
-            {"name": "Marte", "image": "assets/images/earth.png", "distance": 78_000_000, "speed": 350_000,
+            {"name": "MARTE", "image": "assets/images/planets/mars.png", "distance": 78_000_000, "speed": 350_000,
              "curiosity": "O planeta vermelho é conhecido por suas tempestades de poeira.",
              "surface_image": "assets/images/surfaces/mercury_surface.png"}, # mudar imagem
             # Júpiter
-            {"name": "Júpiter", "image": "assets/images/jupiter.png", "distance": 628_000_000, "speed": 500_000,
+            {"name": "JÚPITER", "image": "assets/images/planets/jupiter.png", "distance": 628_000_000, "speed": 500_000,
              "curiosity": "Mercúrio é o menor planeta do sistema solar e o mais próximo do Sol.",
              "surface_image": "assets/images/surfaces/mercury_surface.png"}, # mudar imagem
             # Saturno
-            {"name": "Saturno", "image": "assets/images/earth.png", "distance": 1_275_000_000, "speed": 600_000,
+            {"name": "SATURNO", "image": "assets/images/planets/saturn.png", "distance": 1_275_000_000, "speed": 600_000,
              "curiosity": "Mercúrio é o menor planeta do sistema solar e o mais próximo do Sol.",
              "surface_image": "assets/images/surfaces/mercury_surface.png"}, # mudar imagem
             # Urano
-            {"name": "Urano", "image": "assets/images/earth.png", "distance": 2_721_000_000, "speed": 700_000,
+            {"name": "URANO", "image": "assets/images/planets/urano.png", "distance": 2_721_000_000, "speed": 700_000,
              "curiosity": "Mercúrio é o menor planeta do sistema solar e o mais próximo do Sol.",
              "surface_image": "assets/images/surfaces/mercury_surface.png"}, # mudar imagem
             # Netuno
-            {"name": "Netuno", "image": "assets/images/earth.png", "distance": 4_351_000_000, "speed": 800_000,
+            {"name": "NETUNO", "image": "assets/images/planets/neptune.png", "distance": 4_351_000_000, "speed": 800_000,
              "curiosity": "Mercúrio é o menor planeta do sistema solar e o mais próximo do Sol.",
              "surface_image": "assets/images/surfaces/mercury_surface.png"}, # mudar imagem
         ]
         self.current_index = 0  # Índice do planeta selecionado
-        self.font = pygame.font.Font("assets/fonts/PressStart2P-Regular.ttf", 50) 
+        self.font = pygame.font.Font("assets/fonts/Rajdhani-Bold.ttf", 50) 
 
         # Carregar imagens dos planetas
         self.planet_images = [
@@ -176,13 +176,13 @@ class LevelSelectionState(State):
         screen.blit(name_text, name_rect)
 
         # Instruções
-        instructions_font = pygame.font.Font("assets/fonts/PressStart2P-Regular.ttf", 20)  # Fonte menor
-        instructions = instructions_font.render("Use ← → para navegar, Enter para selecionar", True, (200, 200, 200))
+        instructions_font = pygame.font.Font("assets/fonts/Rajdhani-SemiBold.ttf", 20)  # Fonte menor
+        instructions = instructions_font.render("Use < > para navegar. Enter para selecionar", True, (200, 200, 200))
         instructions_rect = instructions.get_rect(center=(width // 2, height - 50))
         screen.blit(instructions, instructions_rect)
         
         # Exibir os símbolos de navegação
-        nav_font = pygame.font.Font("assets/fonts/PressStart2P-Regular.ttf", 50)  # Fonte para os símbolos
+        nav_font = pygame.font.Font("assets/fonts/Rajdhani-SemiBold.ttf", 50)  # Fonte para os símbolos
         left_arrow_color = (150, 150, 150) if self.left_arrow_active else (255, 255, 255)
         right_arrow_color = (150, 150, 150) if self.right_arrow_active else (255, 255, 255)
 
