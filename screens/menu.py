@@ -9,7 +9,10 @@ class MenuState(State):
         self.manager = manager
 
         self.font = pygame.font.Font(settings.FONT_PATH, settings.FONT_SIZE_GAME)
+        self.small_font = pygame.font.Font(settings.FONT_REGULAR_PATH, settings.FONT_SIZE_SMALL)
+
         self.msg = "Pressione ENTER para começar"
+        self.msg_alt = "ESPAÇO para selecionar o planeta"
 
         # Efeito de Fade
         self.alpha = 0                 
@@ -26,13 +29,13 @@ class MenuState(State):
     def handle_events(self, events):
         for event in events:
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RETURN:  # Pressionar Enter para iniciar
+                if event.key == pygame.K_SPACE:
                     from screens.level_selection import LevelSelectionState
                     self.manager.set_state(LevelSelectionState(self.manager))
                 elif event.key == pygame.K_ESCAPE:  # Pressionar Esc para sair
                     pygame.quit()
                     exit()
-                elif event.key == pygame.K_t:
+                elif event.key == pygame.K_RETURN:
                     from screens.tutorial import TutorialState
                     self.manager.set_state(TutorialState(self.manager))
                 
@@ -62,6 +65,12 @@ class MenuState(State):
         screen.blit(self.logo, self.logo_rect)
 
         text_surf = self.font.render(self.msg, True, (255, 255, 255))
+        text_surf_alt = self.small_font.render(self.msg_alt, True, (255, 255, 255))
+
         text_surf.set_alpha(int(self.alpha))
-        text_rect = text_surf.get_rect(midbottom=(width//2, int(height*0.9)))
+
+        text_rect = text_surf.get_rect(midbottom=(width//2, int(height*0.85)))
         screen.blit(text_surf, text_rect)
+
+        text_rect_alt = text_surf_alt.get_rect(midbottom=(width//2, int(height*0.9)))
+        screen.blit(text_surf_alt, text_rect_alt)

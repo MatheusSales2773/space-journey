@@ -22,6 +22,7 @@ SFX_VOLUME = 0.75
 
 # COnfiguração de fontes
 FONT_PATH       = "assets/fonts/Rajdhani-Bold.ttf"
+FONT_REGULAR_PATH       = "assets/fonts/Rajdhani-SemiBold.ttf"
 FONT_ALT_PATH   = "assets/fonts/Rajdhani-Bold.ttf"
 FONT_ALT_EXPANDED_PATH   = "assets/fonts/Rajdhani-Bold.ttf"
 
