@@ -100,7 +100,8 @@ class LevelSelectionState(State):
                         selected_planet["distance"],
                         selected_planet["speed"],
                         selected_planet["curiosity"],
-                        selected_planet["surface_image"]
+                        selected_planet["surface_image"],
+                        from_tutorial=False,          # ATIVA a animação de entrada
                     ))
             elif event.type == pygame.KEYUP:
                 if event.key == pygame.K_LEFT:  # Soltar a tecla "<"

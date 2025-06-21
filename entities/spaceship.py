@@ -3,22 +3,40 @@ from entities.bullet import Bullet
 import math
 
 class Spaceship(pygame.sprite.Sprite):
-    def __init__(self, image, initial_position, shoot_sound, scale=1.0):
+    def __init__(self, initial_position, shoot_sound, scale=1.0):
         super().__init__()
         
-        if scale != 1.0:
-            w = int(image.get_width() * scale)
-            h = int(image.get_height() * scale)
-            image = pygame.transform.smoothscale(image, (w, h))
+        # --- MODIFICAÇÃO INICIA ---
+        # Guarda a imagem original, sem escala, para referência.
+        # Isto é crucial para que o redimensionamento seja sempre a partir do original.
+        self.original_image = pygame.image.load("assets/images/spaceship.png").convert_alpha()
         
-        self.image = image
-        self.rect = self.image.get_rect(center=initial_position)
+        # A posição inicial do rect será definida após o primeiro redimensionamento
+        self.rect = self.original_image.get_rect(center=initial_position)
+        
+        # Aplica a escala inicial usando o novo método
+        self.set_scale(scale)
+        # --- MODIFICAÇÃO TERMINA ---
+
         self.speed = 5
         self.time_from_last_shoot = 0
         self.shoot_gap = 250  # ms
 
         self.shoot_sound = shoot_sound
         self.shoot_sound.set_volume(0.7)
+
+    # --- NOVO MÉTODO ---
+    def set_scale(self, scale):
+        # Mantém o centro atual da nave para que ela não "salte" ao ser redimensionada.
+        center = self.rect.center
+        
+        w = int(self.original_image.get_width() * scale)
+        h = int(self.original_image.get_height() * scale)
+        
+        self.image = pygame.transform.smoothscale(self.original_image, (w, h))
+        
+        # Recria o rect com o novo tamanho, mas no mesmo centro.
+        self.rect = self.image.get_rect(center=center)
 
     def update(self, pressed_keys):
         if pressed_keys[pygame.K_LEFT]:
@@ -31,8 +49,11 @@ class Spaceship(pygame.sprite.Sprite):
             self.rect.y += self.speed
             
         # Garantir que o foguete não ultrapasse os limites da tela
-        self.rect.x = max(0, min(self.rect.x, pygame.display.get_surface().get_width() - self.rect.width))
-        self.rect.y = max(0, min(self.rect.y, pygame.display.get_surface().get_height() - self.rect.height))
+        width, height = pygame.display.get_surface().get_size()
+        self.rect.left = max(0, self.rect.left)
+        self.rect.right = min(width, self.rect.right)
+        self.rect.top = max(0, self.rect.top)
+        self.rect.bottom = min(height, self.rect.bottom)
 
     def shoot(self, bullet_group, bullet_image):
         now = pygame.time.get_ticks()
@@ -44,24 +65,16 @@ class Spaceship(pygame.sprite.Sprite):
             self.time_from_last_shoot = now
 
     def update_to_center(self, target_x, target_y, speed, dt):
-        # Calcular direção para o centro da tela
         dx = target_x - self.rect.centerx
         dy = target_y - self.rect.centery
-        distance = math.sqrt(dx**2 + dy**2)
+        distance = math.hypot(dx, dy)
 
-        if distance > 0:
-            direction_x = dx / distance  # Vetor unitário na direção X
-            direction_y = dy / distance  # Vetor unitário na direção Y
+        if distance > 1.0: # Adicionada uma pequena margem para evitar "tremer"
+            direction_x = dx / distance
+            direction_y = dy / distance
+            self.rect.x += direction_x * speed * dt
+            self.rect.y += direction_y * speed * dt
         else:
-            direction_x, direction_y = 0, 0  # Já está no centro
-
-        # Mover o foguete em direção ao centro
-        self.rect.x += int(direction_x * speed * dt)
-        self.rect.y += int(direction_y * speed * dt)
-
-        # Verificar se o foguete chegou ao centro (tolerância de 5 pixels)
-        if abs(self.rect.centerx - target_x) < 5 and abs(self.rect.centery - target_y) < 5:
-            self.rect.centerx = target_x  # Forçar alinhamento horizontal
-            self.rect.centery = target_y  # Forçar alinhamento vertical
-            return True  # Chegou ao centro
-        return False  # Ainda não chegou ao centro
+            self.rect.center = (target_x, target_y)
+            return True # Chegou ao centro
+        return False
