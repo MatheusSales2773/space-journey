@@ -4,7 +4,6 @@ from core.gauges.spaceship_stats_gauge import SpaceshipStatsGauge
 from core.gauges.tagert_gauge import TargetGauge
 from config import settings
 
-
 class TutorialHUD:
     def __init__(self, speed, altitude, is_scrolling):
         self.screen = pygame.display.get_surface()
@@ -17,6 +16,9 @@ class TutorialHUD:
         self.countdown_start = 0  # timestamp em ms
         self.countdown_duration = 3000  # 3 segundos
         self.countdown_font = pygame.font.Font(settings.FONT_ALT_PATH, 528)
+
+        self.countdown_sound = pygame.mixer.Sound('assets/audio/countdown.mp3')
+        self.launch_sound = pygame.mixer.Sound('assets/audio/launch.mp3')
 
         self.font = pygame.font.Font(settings.FONT_ALT_PATH, settings.FONT_SIZE_SMALL)
         self.notice_font = pygame.font.Font(settings.FONT_ALT_PATH, 18)
@@ -57,10 +59,11 @@ class TutorialHUD:
         self.hint_padding = 6
 
     def start_countdown(self):
-        """Chamar quando o usuário pressiona SPACE pela primeira vez."""
         if not self.countdown_active and not self.is_scrolling:
             self.countdown_active = True
             self.countdown_start = pygame.time.get_ticks()
+
+            self.countdown_sound.play()
 
     def update(self, speed, altitude, is_scrolling):
         self.speed = speed
@@ -77,6 +80,8 @@ class TutorialHUD:
                 self.is_scrolling = True
                 # Marca que o scrolling está começando agora
                 scrolling_just_started = True
+
+                self.launch_sound.play()
         else:
             # só sincroniza is_scrolling se o countdown não estiver ativo
             self.is_scrolling = is_scrolling
