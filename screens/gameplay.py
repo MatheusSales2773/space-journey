@@ -15,7 +15,7 @@ from entities.explosion import Explosion
 
 class GameplayState(State):
     def __init__(self, manager, planet_name, distance, speed, curiosity, surface_image_path, 
-                 from_tutorial=False, initial_pos=None, initial_scale=None):
+                from_tutorial=False, initial_pos=None, initial_scale=None):
         super().__init__()
         self.manager = manager
         self.planet_name = planet_name
@@ -47,10 +47,6 @@ class GameplayState(State):
         self.font_alt = pygame.font.Font(settings.FONT_ALT_PATH, settings.FONT_SIZE_SMALL)
         self.shoot_sound = pygame.mixer.Sound(settings.SHOOT_SOUND)
         screen_size = pygame.display.get_surface().get_size()
-
-        # --- MODIFICAÇÃO ---
-        # A linha que carregava a imagem da nave foi removida daqui.
-        # self.spaceship_image = pygame.image.load(...) << REMOVIDO
         
         self.bullet_image = pygame.image.load("assets/images/bullet.png").convert_alpha()
         self.asteroid_image = pygame.image.load("assets/images/asteroid.png").convert_alpha()
@@ -75,8 +71,8 @@ class GameplayState(State):
         self.initial_anim_pos = initial_pos
         self.initial_anim_scale = initial_scale
 
-        # --- MODIFICAÇÃO ---
-        # A imagem não é mais passada para o construtor da Spaceship.
+        self.damage_sound = pygame.mixer.Sound("assets/audio/hit_damage.mp3")
+
         self.spaceship = Spaceship(
             initial_position=start_pos,
             shoot_sound=self.shoot_sound,
@@ -201,6 +197,7 @@ class GameplayState(State):
             for _ in spaceship_hits:
                 self.lives -= 1
                 self.hud.start_hit()
+                self.damage_sound.play()
                 self.explosions.add(Explosion(self.explosion_frames, self.spaceship.rect.center))
                 if self.lives <= 0:
                     self.manager.set_state(GameOverState(self.manager))
