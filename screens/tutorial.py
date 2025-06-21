@@ -5,6 +5,9 @@ from core.huds.tutorial_hud import TutorialHUD
 from core.state_manager import State
 from screens.gameplay import GameplayState
 
+target = {"name": "MERCÚRIO", "image": "assets/images/planets/mercury.png", "distance": 77_000_000, "speed": 300_000,
+             "curiosity": "Mercúrio é o menor planeta do sistema solar e o mais próximo do Sol.",
+             "surface_image": "assets/images/surfaces/mercury_surface.png"}
 
 class TutorialState(State):
     def __init__(self, manager):
@@ -59,9 +62,6 @@ class TutorialState(State):
             if e.type == pygame.KEYDOWN:
                 if e.key == pygame.K_SPACE and not self.is_scrolling:
                     self.hud.start_countdown()
-                    self.msg = self.start_msg
-                elif e.key in (pygame.K_RETURN, pygame.K_ESCAPE) and self.y_offset == 0:
-                    self.manager.set_state(GameplayState(self.manager))
 
     def update(self, dt):
         if self.hud.is_scrolling and self.y_offset > 0:
@@ -75,6 +75,15 @@ class TutorialState(State):
             self.y_offset -= self.current_speed * dt
             if self.y_offset < 0:
                 self.y_offset = 0
+
+        if self.is_scrolling and self.y_offset == 0 and not self.hud.countdown_active:
+            self.manager.set_state(GameplayState(
+                self.manager,
+                target["name"],
+                target["distance"],
+                target["speed"],
+                target["curiosity"],
+                target["surface_image"]))
 
         progresso = (self.max_offset - self.y_offset) / self.max_offset if self.max_offset else 1
         altitude_km = progresso * 100.0
