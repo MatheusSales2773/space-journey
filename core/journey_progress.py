@@ -6,7 +6,7 @@ class JourneyProgress:
         self,
         start_icon,
         end_icon,
-        traveled_color=(228,134,78),
+        traveled_color=(255,255,255),
         remaining_color=(40,40,40)
     ):
         self.x = 0
@@ -102,7 +102,7 @@ class JourneyProgress:
         surface.blit(self.indicator_img, (ax, ay))
 
         # Texto de porcentagem 
-        perc_surf = self.font.render(f"{self.percent:.0f}%", True, (228,134,78))
+        perc_surf = self.font.render(f"{self.percent:.0f}%", True, (255,255,255))
         pr = perc_surf.get_rect(
             center=(bar_x + trav_w, bar_y + bar_h + margin_bar_text + text_below / 2)
         )
