@@ -7,7 +7,7 @@ from core.hud import HUD
 
 from screens.menu import MenuState
 from screens.gameover import GameOverState
-from screens.planet_transition import PlanetTransitionState
+from screens.landing import PlanetTransitionState
 
 from entities.spaceship import Spaceship
 from entities.asteroid import Asteroid

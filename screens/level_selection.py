@@ -11,8 +11,8 @@ class LevelSelectionState(State):
 
         # Configuração dos planetas
         self.planets = [
-            {"name": "MERCÚRIO", "image": "assets/images/planets/mercury.png", "distance": 77_000_000, "speed": 300_000,
-             "curiosity": "Mercúrio é o menor planeta do sistema solar e o mais próximo do Sol.",
+            {"name": "MERCÚRIO", "image": "assets/images/planets/mercury.png", "distance": 17_000_000, "speed": 1_000_000,
+             "curiosity": "Mercúrio é um planeta de extremos onde um dia é mais longo que um ano. Suas temperaturas variam drasticamente de 430°C durante o dia a -180°C à noite. Este pequeno mundo está encolhendo devido ao seu enorme núcleo de ferro e, surpreendentemente, abriga gelo em crateras polares que nunca veem a luz do Sol.",
              "surface_image": "assets/images/surfaces/mercury_surface.png"},
             # Vênus
             {"name": "VÊNUS", "image": "assets/images/planets/venus.png", "distance": 41_000_000, "speed": 250_000,
@@ -23,9 +23,9 @@ class LevelSelectionState(State):
              "curiosity": "Mercúrio é o menor planeta do sistema solar e o mais próximo do Sol.",
              "surface_image": "assets/images/surfaces/mercury_surface.png"},
             # Marte
-            {"name": "MARTE", "image": "assets/images/planets/mars.png", "distance": 78_000_000, "speed": 350_000,
+            {"name": "MARTE", "image": "assets/images/planets/mars.png", "distance": 12_000_000, "speed": 350_000,
              "curiosity": "O planeta vermelho é conhecido por suas tempestades de poeira.",
-             "surface_image": "assets/images/surfaces/mercury_surface.png"}, # mudar imagem
+             "surface_image": "assets/images/surfaces/mars_surface.png"}, # mudar imagem
             # Júpiter
             {"name": "JÚPITER", "image": "assets/images/planets/jupiter.png", "distance": 628_000_000, "speed": 500_000,
              "curiosity": "Mercúrio é o menor planeta do sistema solar e o mais próximo do Sol.",

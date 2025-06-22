@@ -34,7 +34,7 @@ class TutorialHUD:
             bg_image_path="assets/images/hud/hud_gauge_leading.png",
             font_path=settings.FONT_ALT_PATH,
             font_size=20,
-            planet_name="LUA"
+            planet_name="MERCÚRIO"
         )
 
         self.stats_gauge = SpaceshipStatsGauge(

@@ -36,7 +36,7 @@ class MenuState(State):
                     pygame.quit()
                     exit()
                 elif event.key == pygame.K_RETURN:
-                    from screens.tutorial import TutorialState
+                    from screens.launching import TutorialState
                     self.manager.set_state(TutorialState(self.manager))
                 
 
